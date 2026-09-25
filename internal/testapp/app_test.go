@@ -4,8 +4,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/lamnguyenx/gtu/v2026/internal/common"
 	"github.com/gdamore/tcell/v2"
+	"github.com/lamnguyenx/gtu/v2026/internal/common"
 	"github.com/rivo/tview"
 	"github.com/stretchr/testify/assert"
 )

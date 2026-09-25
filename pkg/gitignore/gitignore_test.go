@@ -256,7 +256,11 @@ func TestResolveGitDirFile(t *testing.T) {
 	target := filepath.Join(dir, "target")
 	require.NoError(t, os.MkdirAll(target, 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, ".git"), []byte("gitdir: target\n"), 0o644))
-	assert.Equal(t, target, resolveGitDir(dir))
+	// resolveGitDir resolves symlinks, so compare against the resolved target
+	// (t.TempDir may live under a symlinked path, e.g. /var on macOS).
+	resolvedTarget, err := filepath.EvalSymlinks(target)
+	require.NoError(t, err)
+	assert.Equal(t, resolvedTarget, resolveGitDir(dir))
 }
 
 // mustPattern compiles a pattern, panicking on error (test helper).

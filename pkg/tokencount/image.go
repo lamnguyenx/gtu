@@ -84,7 +84,7 @@ func filepathExtLower(path string) string {
 	return ""
 }
 
-func readPngDimensions(path string) (int, int, bool) {
+func readPngDimensions(path string) (w, h int, ok bool) {
 	f, err := os.Open(path)
 	if err != nil {
 		return 0, 0, false
@@ -106,7 +106,7 @@ func readPngDimensions(path string) (int, int, bool) {
 	return width, height, true
 }
 
-func readJpegDimensions(path string) (int, int, bool) {
+func readJpegDimensions(path string) (w, h int, ok bool) {
 	f, err := os.Open(path)
 	if err != nil {
 		return 0, 0, false
@@ -162,7 +162,7 @@ func readJpegDimensions(path string) (int, int, bool) {
 	}
 }
 
-func readGifDimensions(path string) (int, int, bool) {
+func readGifDimensions(path string) (w, h int, ok bool) {
 	f, err := os.Open(path)
 	if err != nil {
 		return 0, 0, false
@@ -184,7 +184,7 @@ func readGifDimensions(path string) (int, int, bool) {
 	return width, height, true
 }
 
-func readBmpDimensions(path string) (int, int, bool) {
+func readBmpDimensions(path string) (w, h int, ok bool) {
 	f, err := os.Open(path)
 	if err != nil {
 		return 0, 0, false
@@ -209,7 +209,7 @@ func readBmpDimensions(path string) (int, int, bool) {
 	return width, height, true
 }
 
-func readWebpDimensions(path string) (int, int, bool) {
+func readWebpDimensions(path string) (w, h int, ok bool) {
 	f, err := os.Open(path)
 	if err != nil {
 		return 0, 0, false

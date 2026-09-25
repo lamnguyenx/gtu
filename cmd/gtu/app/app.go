@@ -553,9 +553,9 @@ func (a *App) createUI(outputAttributes gfs.JSONAttributes) (UI, error) {
 		if a.Flags.ShowSymlinkTarget {
 			stdoutUI.SetShowSymlinkTarget(true)
 		}
-	stdoutUI.Analyzer.SetAutoGitignore(a.Flags.AutoGitignore)
-	stdoutUI.Analyzer.SetIgnoreTokens(!a.Flags.ShowTokens)
-	ui = stdoutUI
+		stdoutUI.Analyzer.SetAutoGitignore(a.Flags.AutoGitignore)
+		stdoutUI.Analyzer.SetIgnoreTokens(!a.Flags.ShowTokens)
+		ui = stdoutUI
 	default:
 		opts := a.getOptions()
 
@@ -745,12 +745,14 @@ func (a *App) getOptions() []tui.Option {
 			ui.SetBrowseParentDirs()
 		})
 	}
-	opts = append(opts, func(ui *tui.UI) {
-		ui.SetShowDiskProgressBar(a.Flags.Style.ProgressModal.ShowDiskProgressBar)
-	})
-	opts = append(opts, func(ui *tui.UI) {
-		ui.ShowTokens = a.Flags.ShowTokens
-	})
+	opts = append(opts,
+		func(ui *tui.UI) {
+			ui.SetShowDiskProgressBar(a.Flags.Style.ProgressModal.ShowDiskProgressBar)
+		},
+		func(ui *tui.UI) {
+			ui.ShowTokens = a.Flags.ShowTokens
+		},
+	)
 	return opts
 }
 

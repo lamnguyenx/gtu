@@ -57,7 +57,10 @@ func (a *TopDirAnalyzer) AnalyzeDir(
 
 	var giStack gitignore.Stack
 	if a.autoGitignore {
-		if m, _ := gitignore.MergeFromDirWithEntries(path, files); m != nil {
+		m, loadErr := gitignore.MergeFromDirWithEntries(path, files)
+		if loadErr != nil {
+			log.Print(loadErr.Error())
+		} else if m != nil {
 			giStack = giStack.Push(m)
 		}
 	}
@@ -191,7 +194,10 @@ func (a *TopDirAnalyzer) processSubDir(path string, topDir *TopDir, giStack giti
 	}
 
 	if a.autoGitignore {
-		if m, _ := gitignore.MergeFromDirWithEntries(path, files); m != nil {
+		m, loadErr := gitignore.MergeFromDirWithEntries(path, files)
+		if loadErr != nil {
+			log.Print(loadErr.Error())
+		} else if m != nil {
 			giStack = giStack.Push(m)
 		}
 	}

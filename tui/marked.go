@@ -6,8 +6,8 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
-	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 	"github.com/gdamore/tcell/v2"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 	"github.com/rivo/tview"
 )
 

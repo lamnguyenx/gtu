@@ -16,9 +16,7 @@ func compilePattern(line string) (*Pattern, error) {
 		line = line[1:]
 	}
 
-	if strings.HasPrefix(line, "\\") {
-		line = line[1:]
-	}
+	line = strings.TrimPrefix(line, "\\")
 
 	if strings.HasSuffix(line, "/") {
 		p.dirOnly = true
@@ -84,27 +82,7 @@ func buildRegex(pattern string) (*regexp.Regexp, error) {
 			sb.WriteString("[^/]")
 			i++
 		case '[':
-			j := i + 1
-			if j < len(pattern) && (pattern[j] == '!' || pattern[j] == '^') {
-				j++
-			}
-			if j < len(pattern) && pattern[j] == ']' {
-				j++
-			}
-			for j < len(pattern) && pattern[j] != ']' {
-				j++
-			}
-			if j < len(pattern) {
-				content := pattern[i+1 : j]
-				if strings.HasPrefix(content, "!") {
-					content = "^" + content[1:]
-				}
-				sb.WriteString("[" + content + "]")
-				i = j + 1
-			} else {
-				sb.WriteString(`\[`)
-				i++
-			}
+			i = writeCharClass(&sb, pattern, i)
 		case '.':
 			sb.WriteString(`\.`)
 			i++
@@ -121,4 +99,30 @@ func buildRegex(pattern string) (*regexp.Regexp, error) {
 	sb.WriteString("(?:/.*)?$")
 
 	return regexp.Compile(sb.String())
+}
+
+// writeCharClass translates a glob character class beginning at pattern[i]
+// (which must be '[') into an equivalent regexp fragment and returns the index
+// just past the closing bracket.
+func writeCharClass(sb *strings.Builder, pattern string, i int) int {
+	j := i + 1
+	if j < len(pattern) && (pattern[j] == '!' || pattern[j] == '^') {
+		j++
+	}
+	if j < len(pattern) && pattern[j] == ']' {
+		j++
+	}
+	for j < len(pattern) && pattern[j] != ']' {
+		j++
+	}
+	if j < len(pattern) {
+		content := pattern[i+1 : j]
+		if strings.HasPrefix(content, "!") {
+			content = "^" + content[1:]
+		}
+		sb.WriteString("[" + content + "]")
+		return j + 1
+	}
+	sb.WriteString(`\[`)
+	return i + 1
 }

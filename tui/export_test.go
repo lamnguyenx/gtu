@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/lamnguyenx/gtu/v2026/internal/testanalyze"
 	"github.com/lamnguyenx/gtu/v2026/internal/testapp"
 	"github.com/lamnguyenx/gtu/v2026/pkg/analyze"
 	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
-	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/stretchr/testify/assert"
 )

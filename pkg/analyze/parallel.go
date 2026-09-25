@@ -70,7 +70,6 @@ func addSubDir(parent, child *Dir) {
 
 func (a *ParallelAnalyzer) processDir(path string, giStack gitignore.Stack) *Dir {
 	var (
-		file       fs.Item
 		err        error
 		totalUsage int64
 		info       os.FileInfo
@@ -97,7 +96,10 @@ func (a *ParallelAnalyzer) processDir(path string, giStack gitignore.Stack) *Dir
 
 	// Load local .gitignore and push onto the stack for this subtree
 	if a.autoGitignore {
-		if m, _ := gitignore.MergeFromDirWithEntries(path, files); m != nil {
+		m, loadErr := gitignore.MergeFromDirWithEntries(path, files)
+		if loadErr != nil {
+			log.Print(loadErr.Error())
+		} else if m != nil {
 			giStack = giStack.Push(m)
 		}
 	}
@@ -155,61 +157,17 @@ func (a *ParallelAnalyzer) processDir(path string, giStack gitignore.Stack) *Dir
 				continue // Skip this file
 			}
 
-			switch {
-			case a.archiveBrowsing && isZipFile(name):
-				zipDir, err := processZipFile(entryPath, info)
-				if err != nil {
-					log.Printf("Failed to process zip file %s: %v", entryPath, err)
-					file = &File{
-						Name:   name,
-						Flag:   getFlag(info),
-						Size:   info.Size(),
-						Parent: dir,
-					}
-				} else {
-					uncompressedSize, compressedSize, err := getZipFileSize(entryPath)
-					if err == nil {
-						zipDir.Size = uncompressedSize
-						zipDir.Usage = compressedSize
-					}
-					zipDir.Parent = dir
-					file = zipDir
-				}
-			case a.archiveBrowsing && isTarFile(name):
-				tarDir, err := processTarFile(entryPath, info)
-				if err != nil {
-					log.Printf("Failed to process tar file %s: %v", entryPath, err)
-					file = &File{
-						Name:   name,
-						Flag:   getFlag(info),
-						Size:   info.Size(),
-						Parent: dir,
-					}
-				} else {
-					tarDir.Parent = dir
-					file = tarDir
-				}
-			default:
-				file = &File{
-					Name:    name,
-					Flag:    getFlag(info),
-					Size:    info.Size(),
-					Parent:  dir,
-					Symlink: symlinkTarget,
-				}
-			}
+			file := createFileItem(name, entryPath, symlinkTarget, info, dir, a.archiveBrowsing)
 
-			if file != nil {
-				// Only set platform-specific attributes for regular files
-				if regularFile, ok := file.(*File); ok {
-					if !a.ignoreTokens {
-						regularFile.Tokens = tokencount.CountTokens(entryPath, info)
-					}
-					setPlatformSpecificAttrs(regularFile, info)
+			// Only set platform-specific attributes for regular files
+			if regularFile, ok := file.(*File); ok {
+				if !a.ignoreTokens {
+					regularFile.Tokens = tokencount.CountTokens(entryPath, info)
 				}
-				totalUsage += file.GetUsage()
-				dir.AddFile(file)
+				setPlatformSpecificAttrs(regularFile, info)
 			}
+			totalUsage += file.GetUsage()
+			dir.AddFile(file)
 		}
 	}
 
@@ -246,4 +204,51 @@ func getFlag(f os.FileInfo) rune {
 		return '@'
 	}
 	return ' '
+}
+
+// createFileItem builds the tree item for a single directory entry, handling
+// archive browsing and falling back to a regular file. It is shared by the
+// parallel and sequential analyzers so both produce identical items.
+func createFileItem(name, entryPath, symlinkTarget string, info os.FileInfo, dir *Dir, archiveBrowsing bool) fs.Item {
+	switch {
+	case archiveBrowsing && isZipFile(name):
+		zipDir, err := processZipFile(entryPath, info)
+		if err != nil {
+			log.Printf("Failed to process zip file %s: %v", entryPath, err)
+			return &File{
+				Name:   name,
+				Flag:   getFlag(info),
+				Size:   info.Size(),
+				Parent: dir,
+			}
+		}
+		uncompressedSize, compressedSize, err := getZipFileSize(entryPath)
+		if err == nil {
+			zipDir.Size = uncompressedSize
+			zipDir.Usage = compressedSize
+		}
+		zipDir.Parent = dir
+		return zipDir
+	case archiveBrowsing && isTarFile(name):
+		tarDir, err := processTarFile(entryPath, info)
+		if err != nil {
+			log.Printf("Failed to process tar file %s: %v", entryPath, err)
+			return &File{
+				Name:   name,
+				Flag:   getFlag(info),
+				Size:   info.Size(),
+				Parent: dir,
+			}
+		}
+		tarDir.Parent = dir
+		return tarDir
+	default:
+		return &File{
+			Name:    name,
+			Flag:    getFlag(info),
+			Size:    info.Size(),
+			Parent:  dir,
+			Symlink: symlinkTarget,
+		}
+	}
 }

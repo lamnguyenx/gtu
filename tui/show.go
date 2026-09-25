@@ -89,11 +89,11 @@ func (ui *UI) followCurrentDirWithCwd() {
 // nolint: funlen // Why: complex function
 func (ui *UI) showDir() {
 	var (
-		totalUsage int64
-		totalSize  int64
+		totalUsage  int64
+		totalSize   int64
 		totalTokens int64
-		maxima     rowMaxima
-		itemCount  int64
+		maxima      rowMaxima
+		itemCount   int64
 	)
 
 	ui.currentDirPath = ui.currentDir.GetPath()

@@ -15,13 +15,13 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/lamnguyenx/gtu/v2026/internal/common"
 	"github.com/lamnguyenx/gtu/v2026/pkg/analyze"
 	"github.com/lamnguyenx/gtu/v2026/pkg/device"
 	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 	"github.com/lamnguyenx/gtu/v2026/pkg/remove"
 	"github.com/lamnguyenx/gtu/v2026/pkg/timefilter"
-	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 

@@ -186,23 +186,24 @@ func MergeFromDirWithEntries(dir string, entries []os.DirEntry) (*Matcher, error
 		return nil, err
 	}
 	for _, e := range entries {
-		if e.Name() == ".git" {
-			gitDir := resolveGitDir(dir)
-			if gitDir == "" {
-				break
-			}
-			excludePath := filepath.Join(gitDir, "info", "exclude")
-			if _, err := os.Stat(excludePath); err == nil {
-				ex, err := LoadFromFile(dir, excludePath)
-				if err == nil && ex != nil {
-					if m == nil {
-						return ex, nil
-					}
-					m.merge(ex)
-				}
-			}
+		if e.Name() != ".git" {
+			continue
+		}
+		gitDir := resolveGitDir(dir)
+		if gitDir == "" {
 			break
 		}
+		excludePath := filepath.Join(gitDir, "info", "exclude")
+		if _, err := os.Stat(excludePath); err == nil {
+			ex, err := LoadFromFile(dir, excludePath)
+			if err == nil && ex != nil {
+				if m == nil {
+					return ex, nil
+				}
+				m.merge(ex)
+			}
+		}
+		break
 	}
 	return m, nil
 }

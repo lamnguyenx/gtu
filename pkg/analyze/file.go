@@ -465,6 +465,13 @@ func (f *Dir) GetItemCount() int64 {
 	return f.ItemCount
 }
 
+// GetTokens returns the current estimated token count.
+func (f *Dir) GetTokens() int64 {
+	f.m.RLock()
+	defer f.m.RUnlock()
+	return f.Tokens
+}
+
 // IsDir returns true for dir
 func (f *Dir) IsDir() bool {
 	return true

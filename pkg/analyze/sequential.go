@@ -44,7 +44,6 @@ func (a *SequentialAnalyzer) AnalyzeDir(
 
 func (a *SequentialAnalyzer) processDir(path string, giStack gitignore.Stack) *Dir {
 	var (
-		file      fs.Item
 		err       error
 		totalSize int64
 		info      os.FileInfo
@@ -67,7 +66,10 @@ func (a *SequentialAnalyzer) processDir(path string, giStack gitignore.Stack) *D
 
 	// Load local .gitignore and push onto the stack for this subtree
 	if a.autoGitignore {
-		if m, _ := gitignore.MergeFromDirWithEntries(path, files); m != nil {
+		m, loadErr := gitignore.MergeFromDirWithEntries(path, files)
+		if loadErr != nil {
+			log.Print(loadErr.Error())
+		} else if m != nil {
 			giStack = giStack.Push(m)
 		}
 	}
@@ -126,61 +128,17 @@ func (a *SequentialAnalyzer) processDir(path string, giStack gitignore.Stack) *D
 				continue // Skip this file
 			}
 
-			switch {
-			case a.archiveBrowsing && isZipFile(name):
-				zipDir, err := processZipFile(entryPath, info)
-				if err != nil {
-					log.Printf("Failed to process zip file %s: %v", entryPath, err)
-					file = &File{
-						Name:   name,
-						Flag:   getFlag(info),
-						Size:   info.Size(),
-						Parent: dir,
-					}
-				} else {
-					uncompressedSize, compressedSize, err := getZipFileSize(entryPath)
-					if err == nil {
-						zipDir.Size = uncompressedSize
-						zipDir.Usage = compressedSize
-					}
-					zipDir.Parent = dir
-					file = zipDir
-				}
-			case a.archiveBrowsing && isTarFile(name):
-				tarDir, err := processTarFile(entryPath, info)
-				if err != nil {
-					log.Printf("Failed to process tar file %s: %v", entryPath, err)
-					file = &File{
-						Name:   name,
-						Flag:   getFlag(info),
-						Size:   info.Size(),
-						Parent: dir,
-					}
-				} else {
-					tarDir.Parent = dir
-					file = tarDir
-				}
-			default:
-				file = &File{
-					Name:    name,
-					Flag:    getFlag(info),
-					Size:    info.Size(),
-					Parent:  dir,
-					Symlink: symlinkTarget,
-				}
-			}
+			file := createFileItem(name, entryPath, symlinkTarget, info, dir, a.archiveBrowsing)
 
-			if file != nil {
-				// Only set platform-specific attributes for regular files
-				if regularFile, ok := file.(*File); ok {
-					if !a.ignoreTokens {
-						regularFile.Tokens = tokencount.CountTokens(entryPath, info)
-					}
-					setPlatformSpecificAttrs(regularFile, info)
+			// Only set platform-specific attributes for regular files
+			if regularFile, ok := file.(*File); ok {
+				if !a.ignoreTokens {
+					regularFile.Tokens = tokencount.CountTokens(entryPath, info)
 				}
-				totalSize += file.GetUsage()
-				dir.AddFile(file)
+				setPlatformSpecificAttrs(regularFile, info)
 			}
+			totalSize += file.GetUsage()
+			dir.AddFile(file)
 		}
 	}
 

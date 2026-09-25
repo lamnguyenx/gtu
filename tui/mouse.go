@@ -1,8 +1,8 @@
 package tui
 
 import (
-	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 	"github.com/gdamore/tcell/v2"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 	"github.com/rivo/tview"
 )
 

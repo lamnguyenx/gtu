@@ -12,12 +12,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/lamnguyenx/gtu/v2026/build"
 	"github.com/lamnguyenx/gtu/v2026/internal/common"
 	"github.com/lamnguyenx/gtu/v2026/pkg/analyze"
 	"github.com/lamnguyenx/gtu/v2026/pkg/device"
 	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
-	"github.com/fatih/color"
 )
 
 const clearTerminalLine = "\r\x1b[2K"
