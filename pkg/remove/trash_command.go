@@ -72,7 +72,7 @@ func TrashCommand(command string) func(dir, item fs.Item) error {
 		}
 
 		var stderr bytes.Buffer
-		argv := []string{"-c", shellScript(command), "gdu", absPath}
+		argv := []string{"-c", shellScript(command), "gtu", absPath}
 		envv := append(trashCommandOS.environ(), trashPathEnvVar+"="+absPath)
 
 		if err := trashCommandOS.run(shellBin, argv, envv, &stderr); err != nil {

@@ -17,6 +17,7 @@ const (
 	SortByItemCount
 	SortByMtime
 	SortByApparentSize
+	SortByTokens
 )
 
 // SortOrder represents the sort direction
@@ -36,13 +37,14 @@ type Item interface {
 	GetSize() int64
 	GetType() string
 	GetUsage() int64
+	GetTokens() int64
 	GetMtime() time.Time
 	GetItemCount() int64
 	GetParent() Item
 	SetParent(Item)
 	GetMultiLinkedInode() uint64
 	EncodeJSON(writer io.Writer, topLevel bool, attributes JSONAttributes) error
-	GetItemStats(linkedItems HardLinkedItems, filteringFiles bool) (itemCount int64, size, usage int64)
+	GetItemStats(linkedItems HardLinkedItems, filteringFiles bool) (itemCount, size, usage, tokens int64)
 	UpdateStats(linkedItems HardLinkedItems)
 	UpdateStatsWithFileFiltering(linkedItems HardLinkedItems)
 	AddFile(Item)
@@ -127,6 +129,18 @@ func (f ByApparentSize) Less(i, j int) bool {
 	return natural.Less(f[i].GetName(), f[j].GetName())
 }
 
+// ByTokens sorts files by token count
+type ByTokens Files
+
+func (f ByTokens) Len() int      { return len(f) }
+func (f ByTokens) Swap(i, j int) { f[i], f[j] = f[j], f[i] }
+func (f ByTokens) Less(i, j int) bool {
+	if f[i].GetTokens() != f[j].GetTokens() {
+		return f[i].GetTokens() < f[j].GetTokens()
+	}
+	return natural.Less(f[i].GetName(), f[j].GetName())
+}
+
 // DisplayedItemCount returns the item count as it is presented to the user.
 //
 // For a directory it is the number of items contained in its tree, excluding
@@ -190,6 +204,8 @@ func ParseSortBy(s string) SortBy {
 		return SortByItemCount
 	case "mtime":
 		return SortByMtime
+	case "tokens":
+		return SortByTokens
 	default:
 		return SortBySize
 	}

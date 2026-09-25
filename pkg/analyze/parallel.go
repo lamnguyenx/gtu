@@ -7,6 +7,8 @@ import (
 
 	"github.com/dundee/gdu/v5/internal/common"
 	"github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/dundee/gdu/v5/pkg/gitignore"
+	"github.com/dundee/gdu/v5/pkg/tokencount"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -34,7 +36,13 @@ func (a *ParallelAnalyzer) AnalyzeDir(
 	a.ignoreFileType = fileTypeFilter
 
 	go a.UpdateProgress()
-	dir := a.processDir(path)
+	var giStack gitignore.Stack
+	if a.autoGitignore {
+		if m, _ := gitignore.MergeFromDir(path); m != nil {
+			giStack = giStack.Push(m)
+		}
+	}
+	dir := a.processDir(path, giStack)
 
 	dir.BasePath = filepath.Dir(path)
 	a.setCurrentDir(dir)
@@ -46,7 +54,7 @@ func (a *ParallelAnalyzer) AnalyzeDir(
 	return dir
 }
 
-func (a *ParallelAnalyzer) processQueuedDir(path string, parent *Dir, result chan<- *Dir) {
+func (a *ParallelAnalyzer) processQueuedDir(path string, parent *Dir, result chan<- *Dir, giStack gitignore.Stack) {
 	concurrencyLimit <- struct{}{}
 	if a.IsCancelled() {
 		<-concurrencyLimit
@@ -54,7 +62,7 @@ func (a *ParallelAnalyzer) processQueuedDir(path string, parent *Dir, result cha
 		return
 	}
 
-	subdir := a.processDir(path)
+	subdir := a.processDir(path, giStack)
 	subdir.Parent = parent
 	<-concurrencyLimit
 	result <- subdir
@@ -66,7 +74,7 @@ func addSubDir(parent, child *Dir) {
 	}
 }
 
-func (a *ParallelAnalyzer) processDir(path string) *Dir {
+func (a *ParallelAnalyzer) processDir(path string, giStack gitignore.Stack) *Dir {
 	var (
 		file       fs.Item
 		err        error
@@ -93,6 +101,13 @@ func (a *ParallelAnalyzer) processDir(path string) *Dir {
 	}
 	setDirPlatformSpecificAttrs(dir, path)
 
+	// Load local .gitignore and push onto the stack for this subtree
+	if a.autoGitignore {
+		if m, _ := gitignore.MergeFromDir(path); m != nil {
+			giStack = giStack.Push(m)
+		}
+	}
+
 	for _, f := range files {
 		if a.IsCancelled() {
 			break
@@ -103,13 +118,21 @@ func (a *ParallelAnalyzer) processDir(path string) *Dir {
 			if a.shouldSkipDir(name, entryPath) {
 				continue
 			}
+			if len(giStack) > 0 && giStack.Match(entryPath, true) {
+				continue
+			}
 			dirCount++
 
-			go a.processQueuedDir(entryPath, dir, subDirChan)
+			go a.processQueuedDir(entryPath, dir, subDirChan, giStack)
 		} else {
 			// Apply file type filter if set
 			if a.ignoreFileType != nil && a.ignoreFileType(name) {
 				continue // Skip this file
+			}
+
+			// Apply auto-gitignore for files
+			if len(giStack) > 0 && giStack.Match(entryPath, false) {
+				continue
 			}
 
 			info, err = f.Info()
@@ -182,13 +205,14 @@ func (a *ParallelAnalyzer) processDir(path string) *Dir {
 				}
 			}
 
-			if file != nil {
-				// Only set platform-specific attributes for regular files
-				if regularFile, ok := file.(*File); ok {
-					setPlatformSpecificAttrs(regularFile, info)
-				}
-				totalUsage += file.GetUsage()
-				dir.AddFile(file)
+		if file != nil {
+			// Only set platform-specific attributes for regular files
+			if regularFile, ok := file.(*File); ok {
+				regularFile.Tokens = tokencount.CountTokens(entryPath, info)
+				setPlatformSpecificAttrs(regularFile, info)
+			}
+			totalUsage += file.GetUsage()
+			dir.AddFile(file)
 			}
 		}
 	}

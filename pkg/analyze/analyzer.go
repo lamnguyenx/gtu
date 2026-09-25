@@ -25,6 +25,7 @@ type BaseAnalyzer struct {
 	gitAnnexedSize          bool
 	matchesTimeFilterFn     common.TimeFilter
 	archiveBrowsing         bool
+	autoGitignore           bool
 	progressTicker          *time.Ticker
 }
 
@@ -77,6 +78,12 @@ func (a *BaseAnalyzer) SetTimeFilter(matchesTimeFilterFn common.TimeFilter) {
 // SetArchiveBrowsing sets whether browsing of zip/jar/tar archives is enabled
 func (a *BaseAnalyzer) SetArchiveBrowsing(v bool) {
 	a.archiveBrowsing = v
+}
+
+// SetAutoGitignore enables automatic .gitignore discovery and stacking during
+// the directory walk.
+func (a *BaseAnalyzer) SetAutoGitignore(v bool) {
+	a.autoGitignore = v
 }
 
 // SetFileTypeFilter sets the file type filter function

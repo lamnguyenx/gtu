@@ -59,9 +59,12 @@ func (ui *UI) getSortParams() (fs.SortBy, fs.SortOrder) {
 	case mtimeSortKey:
 		sortBy = fs.SortByMtime
 	case sizeSortKey:
-		if ui.ShowApparentSize {
+		switch {
+		case ui.ShowTokens:
+			sortBy = fs.SortByTokens
+		case ui.ShowApparentSize:
 			sortBy = fs.SortByApparentSize
-		} else {
+		default:
 			sortBy = fs.SortBySize
 		}
 	default:

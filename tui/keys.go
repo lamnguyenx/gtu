@@ -264,9 +264,9 @@ func (ui *UI) confirmQuitDialog(printCurrentDirPath bool) {
 	if ui.scanning {
 		text = "A scan has been running for " +
 			time.Since(ui.scanStart).Round(time.Second).String() + ".\n\n" +
-			"Do you really want to quit gdu and abandon it?"
+			"Do you really want to quit gtu and abandon it?"
 	} else {
-		text = "Do you really want to quit gdu?\n\n" +
+		text = "Do you really want to quit gtu?\n\n" +
 			"This scan took " + ui.scanDuration.Round(time.Second).String() +
 			" and the results are not saved.\n" +
 			"Choose \"no\" and press E to export them first."
@@ -521,7 +521,15 @@ func (ui *UI) handleMainActions(key *tcell.EventKey) *tcell.EventKey {
 func (ui *UI) handleToggles(key *tcell.EventKey) {
 	switch key.Rune() {
 	case 'a':
-		ui.ShowApparentSize = !ui.ShowApparentSize
+		switch {
+		case ui.ShowTokens:
+			ui.ShowTokens = false
+		case ui.ShowApparentSize:
+			ui.ShowTokens = true
+			ui.ShowApparentSize = false
+		default:
+			ui.ShowApparentSize = true
+		}
 	case 'B':
 		ui.ShowRelativeSize = !ui.ShowRelativeSize
 	case 'c':

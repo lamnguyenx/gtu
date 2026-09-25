@@ -509,6 +509,7 @@ type SqliteItem struct {
 	isDir     bool
 	size      int64
 	usage     int64
+	tokens    int64
 	mtime     time.Time
 	itemCount int64
 	mli       uint64
@@ -569,6 +570,13 @@ func (i *SqliteItem) GetUsage() int64 {
 	i.m.RLock()
 	defer i.m.RUnlock()
 	return i.usage
+}
+
+// GetTokens returns the estimated token count
+func (i *SqliteItem) GetTokens() int64 {
+	i.m.RLock()
+	defer i.m.RUnlock()
+	return i.tokens
 }
 
 // GetMtime returns the modification time
@@ -749,8 +757,8 @@ func addSqliteString(buff *[]byte, val string) error {
 }
 
 // GetItemStats returns item statistics - hard links already handled during scan
-func (i *SqliteItem) GetItemStats(linkedItems fs.HardLinkedItems, filteringFiles bool) (itemCount, size, usage int64) {
-	return i.itemCount, i.size, i.usage
+func (i *SqliteItem) GetItemStats(linkedItems fs.HardLinkedItems, filteringFiles bool) (itemCount, size, usage, tokens int64) {
+	return i.itemCount, i.size, i.usage, i.tokens
 }
 
 // UpdateStats is a no-op for SqliteItem - hard links are handled during scan
@@ -1210,7 +1218,7 @@ func (a *SqliteAnalyzer) processDir(path string, parentID *int64) *SqliteItem {
 
 	// Files excluded by a type or time filter were never counted above, so the
 	// empty-directory rule sees exactly the entries that survived filtering.
-	itemCount, totalSize, totalUsage := resolveDirStats(totals, a.isFilteringFiles())
+	itemCount, totalSize, totalUsage, _ := resolveDirStats(totals, a.isFilteringFiles())
 
 	// Update directory with computed stats
 	if err := a.updateDirLocked(dirID, totalSize, totalUsage, itemCount, dirFlag); err != nil {

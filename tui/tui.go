@@ -198,7 +198,7 @@ func CreateUI(
 	ui.app.SetMouseCapture(ui.onMouse)
 
 	ui.header = tview.NewTextView()
-	ui.header.SetText(" gdu ~ Use arrow keys to navigate, press ? for help ")
+	ui.header.SetText(" gtu ~ Use arrow keys to navigate, press ? for help ")
 	ui.header.SetTextColor(tcell.GetColor(ui.headerTextColor))
 	ui.header.SetBackgroundColor(tcell.GetColor(ui.headerBackgroundColor))
 
@@ -454,7 +454,7 @@ func (ui *UI) cancelScan() bool {
 	ui.progress.SetTitle(" Stopping scan... ")
 	stopping := "Stopping scan and keeping results..."
 	if !ui.ctrlCQuits {
-		stopping += "\n\nPress Ctrl+C again to quit gdu"
+		stopping += "\n\nPress Ctrl+C again to quit gtu"
 	}
 	ui.progress.SetText(stopping)
 	return true

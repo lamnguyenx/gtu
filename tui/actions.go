@@ -530,7 +530,7 @@ func (ui *UI) exportAnalysis() {
 
 		var buff bytes.Buffer
 
-		buff.Write([]byte(`[1,2,{"progname":"gdu","progver":"`))
+		buff.Write([]byte(`[1,2,{"progname":"gtu","progver":"`))
 		buff.Write([]byte(build.Version))
 		buff.Write([]byte(`","timestamp":`))
 		buff.Write([]byte(strconv.FormatInt(time.Now().Unix(), 10)))

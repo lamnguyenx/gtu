@@ -247,7 +247,7 @@ func (ui *UI) exportDir(dir fs.Item, waitWritten *sync.WaitGroup) error {
 		err  error
 	)
 
-	buff.Write([]byte(`[1,2,{"progname":"gdu","progver":"`))
+	buff.Write([]byte(`[1,2,{"progname":"gtu","progver":"`))
 	buff.Write([]byte(build.Version))
 	buff.Write([]byte(`","timestamp":`))
 	buff.Write([]byte(strconv.FormatInt(time.Now().Unix(), 10)))

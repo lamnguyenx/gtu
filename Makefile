@@ -1,6 +1,7 @@
-NAME := gdu
+NAME := gtu
+MODULE := gdu
 MAJOR_VER := v5
-PACKAGE := github.com/dundee/$(NAME)/$(MAJOR_VER)
+PACKAGE := github.com/dundee/$(MODULE)/$(MAJOR_VER)
 CMD_GDU := cmd/gdu
 VERSION := $(shell git describe --tags 2>/dev/null)
 NAMEVER := $(NAME)-$(subst v,,$(VERSION))
@@ -47,7 +48,7 @@ build-web:
 
 build-docker:
 	@echo "Version: " $(VERSION)
-	docker build . --tag ghcr.io/dundee/gdu:$(VERSION)
+	docker build . --tag ghcr.io/dundee/gtu:$(VERSION)
 
 build-all:
 	@echo "Version: " $(VERSION)
@@ -55,34 +56,34 @@ build-all:
 	CGO_ENABLED=0 gox \
 		-os="darwin" \
 		-arch="amd64 arm64" \
-		-output="dist/gdu_{{.OS}}_{{.Arch}}" \
+		-output="dist/gtu_{{.OS}}_{{.Arch}}" \
 		-ldflags="$(LDFLAGS)" \
 		$(PACKAGE)/$(CMD_GDU)
 
 	CGO_ENABLED=0 gox \
 		-os="windows" \
 		-arch="amd64" \
-		-output="dist/gdu_{{.OS}}_{{.Arch}}" \
+		-output="dist/gtu_{{.OS}}_{{.Arch}}" \
 		-ldflags="$(LDFLAGS)" \
 		$(PACKAGE)/$(CMD_GDU)
 
 	CGO_ENABLED=0 gox \
 		-os="linux freebsd netbsd openbsd" \
-		-output="dist/gdu_{{.OS}}_{{.Arch}}" \
+		-output="dist/gtu_{{.OS}}_{{.Arch}}" \
 		-ldflags="$(LDFLAGS)" \
 		$(PACKAGE)/$(CMD_GDU)
 
-	GOFLAGS="$(GOFLAGS)" CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gdu_linux_amd64 $(PACKAGE)/$(CMD_GDU)
-	GOFLAGS="$(GOFLAGS_STATIC)" CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gdu_linux_amd64_static $(PACKAGE)/$(CMD_GDU)
+	GOFLAGS="$(GOFLAGS)" CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_amd64 $(PACKAGE)/$(CMD_GDU)
+	GOFLAGS="$(GOFLAGS_STATIC)" CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_amd64_static $(PACKAGE)/$(CMD_GDU)
 
-	CGO_ENABLED=0 GOOS=linux GOARM=5 GOARCH=arm $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gdu_linux_armv5l $(PACKAGE)/$(CMD_GDU)
-	CGO_ENABLED=0 GOOS=linux GOARM=6 GOARCH=arm $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gdu_linux_armv6l $(PACKAGE)/$(CMD_GDU)
-	CGO_ENABLED=0 GOOS=linux GOARM=7 GOARCH=arm $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gdu_linux_armv7l $(PACKAGE)/$(CMD_GDU)
-	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gdu_linux_arm64 $(PACKAGE)/$(CMD_GDU)
-	CGO_ENABLED=0 GOOS=android GOARCH=arm64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gdu_android_arm64 $(PACKAGE)/$(CMD_GDU)
+	CGO_ENABLED=0 GOOS=linux GOARM=5 GOARCH=arm $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_armv5l $(PACKAGE)/$(CMD_GDU)
+	CGO_ENABLED=0 GOOS=linux GOARM=6 GOARCH=arm $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_armv6l $(PACKAGE)/$(CMD_GDU)
+	CGO_ENABLED=0 GOOS=linux GOARM=7 GOARCH=arm $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_armv7l $(PACKAGE)/$(CMD_GDU)
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_arm64 $(PACKAGE)/$(CMD_GDU)
+	CGO_ENABLED=0 GOOS=android GOARCH=arm64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_android_arm64 $(PACKAGE)/$(CMD_GDU)
 
-	cd dist; for file in gdu_linux_* gdu_darwin_* gdu_netbsd_* gdu_openbsd_* gdu_freebsd_* gdu_android_*; do tar czf $$file.tgz $$file; done
-	cd dist; for file in gdu_windows_*; do zip $$file.zip $$file; done
+	cd dist; for file in gtu_linux_* gtu_darwin_* gtu_netbsd_* gtu_openbsd_* gtu_freebsd_* gtu_android_*; do tar czf $$file.tgz $$file; done
+	cd dist; for file in gtu_windows_*; do zip $$file.zip $$file; done
 
 gdu.1: gdu.1.md
 	sed 's/{{date}}/$(DATE)/g' gdu.1.md > gdu.1.date.md

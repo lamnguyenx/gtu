@@ -356,6 +356,7 @@ func (f *StoredDir) invalidateCache() {
 // write lock so readers never see the stats and the stored copy disagree.
 func (f *StoredDir) subtractStats(item fs.Item) {
 	itemCount, size, usage := item.GetItemCount(), item.GetSize(), item.GetUsage()
+	tokens := item.GetTokens()
 
 	cur := f
 	for {
@@ -363,6 +364,7 @@ func (f *StoredDir) subtractStats(item fs.Item) {
 		cur.ItemCount -= itemCount
 		cur.Size -= size
 		cur.Usage -= usage
+		cur.Tokens -= tokens
 		err := DefaultStorage.StoreDir(cur)
 		cur.m.Unlock()
 
@@ -378,10 +380,10 @@ func (f *StoredDir) subtractStats(item fs.Item) {
 	}
 }
 
-// GetItemStats returns item count, apparent usage and real usage of this dir
-func (f *StoredDir) GetItemStats(linkedItems fs.HardLinkedItems, filteringFiles bool) (itemCount, size, usage int64) {
+// GetItemStats returns item count, apparent usage, real usage and token count of this dir
+func (f *StoredDir) GetItemStats(linkedItems fs.HardLinkedItems, filteringFiles bool) (itemCount, size, usage, tokens int64) {
 	f.updateStats(linkedItems, filteringFiles)
-	return f.GetItemCount(), f.GetSize(), f.GetUsage()
+	return f.GetItemCount(), f.GetSize(), f.GetUsage(), f.GetTokens()
 }
 
 func (f *StoredDir) UpdateStatsWithFileFiltering(linkedItems fs.HardLinkedItems) {
@@ -419,7 +421,7 @@ func (f *StoredDir) updateStats(linkedItems fs.HardLinkedItems, filteringFiles b
 
 	f.Mtime = mtime
 	f.Flag = flag
-	f.ItemCount, f.Size, f.Usage = resolveDirStats(totals, filteringFiles)
+	f.ItemCount, f.Size, f.Usage, f.Tokens = resolveDirStats(totals, filteringFiles)
 
 	if err := DefaultStorage.StoreDir(f); err != nil {
 		log.Print(err.Error())
@@ -460,6 +462,7 @@ func (p *ParentDir) IsDir() bool                                         { panic
 func (p *ParentDir) GetSize() int64                                      { panic("must not be called") }
 func (p *ParentDir) GetType() string                                     { panic("must not be called") }
 func (p *ParentDir) GetUsage() int64                                     { panic("must not be called") }
+func (p *ParentDir) GetTokens() int64                                    { panic("must not be called") }
 func (p *ParentDir) GetMtime() time.Time                                 { panic("must not be called") }
 func (p *ParentDir) GetItemCount() int64                                 { panic("must not be called") }
 func (p *ParentDir) GetParent() fs.Item                                  { panic("must not be called") }
@@ -480,6 +483,6 @@ func (p *ParentDir) RemoveFile(item fs.Item)      { panic("must not be called") 
 func (p *ParentDir) RemoveFileByName(name string) { panic("must not be called") }
 func (p *ParentDir) GetItemStats(
 	linkedItems fs.HardLinkedItems, filteringFiles bool,
-) (itemCount, size, usage int64) {
+) (itemCount, size, usage, tokens int64) {
 	panic("must not be called")
 }

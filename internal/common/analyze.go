@@ -28,6 +28,7 @@ type Analyzer interface {
 	SetShowAnnexedSize(bool)
 	SetTimeFilter(timeFilter TimeFilter)
 	SetArchiveBrowsing(bool)
+	SetAutoGitignore(bool)
 	SetFileTypeFilter(filter ShouldFileBeIgnored)
 	Cancel()
 	GetDone() SignalGroup

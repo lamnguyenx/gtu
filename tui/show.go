@@ -27,13 +27,13 @@ var (
                [::b]E     [white:black:-]Export analysis data to file as JSON
                [::b]/     [white:black:-]Search items by name
                [::b]T     [white:black:-]Filter items by file type (extension)
-               [::b]a     [white:black:-]Toggle between showing disk usage and apparent size
+               [::b]a     [white:black:-]Cycle: token count / disk usage / apparent size
                [::b]B     [white:black:-]Toggle bar alignment to biggest file or directory
                [::b]c     [white:black:-]Show/hide item count
                [::b]m     [white:black:-]Show/hide latest mtime
                [::b]b     [white:black:-]Spawn shell in current directory
-               [::b]q     [white:black:-]Quit gdu (asks to confirm after a long scan)
-               [::b]Q     [white:black:-]Quit gdu and print current directory path
+               [::b]q     [white:black:-]Quit gtu (asks to confirm after a long scan)
+               [::b]Q     [white:black:-]Quit gtu and print current directory path
 
 During a scan:
              [::b]tab     [white:black:-]Preview results found so far
@@ -91,6 +91,7 @@ func (ui *UI) showDir() {
 	var (
 		totalUsage int64
 		totalSize  int64
+		totalTokens int64
 		maxima     rowMaxima
 		itemCount  int64
 	)
@@ -144,12 +145,16 @@ func (ui *UI) showDir() {
 			if item.GetSize() > maxima.size {
 				maxima.size = item.GetSize()
 			}
+			if item.GetTokens() > maxima.tokens {
+				maxima.tokens = item.GetTokens()
+			}
 			if count > maxima.count {
 				maxima.count = count
 			}
 		} else {
 			maxima.size += item.GetSize()
 			maxima.usage += item.GetUsage()
+			maxima.tokens += item.GetTokens()
 			maxima.count += count
 		}
 		i++
@@ -174,6 +179,7 @@ func (ui *UI) showDir() {
 		if !ignored {
 			totalUsage += item.GetUsage()
 			totalSize += item.GetSize()
+			totalTokens += item.GetTokens()
 			itemCount += item.GetItemCount()
 		}
 
@@ -250,9 +256,16 @@ func (ui *UI) showDir() {
 
 	ui.footerLabel.SetText(
 		selected + footerTextColor +
-			" Total disk usage: " +
-			footerNumberColor +
-			ui.formatSize(totalUsage, true, false) +
+			func() string {
+				if ui.ShowTokens {
+					return " Total tokens: " +
+						footerNumberColor +
+						formatTokens(totalTokens)
+				}
+				return " Total disk usage: " +
+					footerNumberColor +
+					ui.formatSize(totalUsage, true, false)
+			}() +
 			" Apparent size: " +
 			footerNumberColor +
 			ui.formatSize(totalSize, true, false) +
@@ -388,7 +401,7 @@ func (ui *UI) showHelp() {
 	text := tview.NewTextView().SetDynamicColors(true)
 	text.SetBorder(true).SetBorderPadding(2, 2, 2, 2)
 	text.SetBorderColor(tcell.ColorDefault)
-	text.SetTitle(" gdu help ")
+	text.SetTitle(" gtu help ")
 	text.SetScrollable(true)
 
 	formattedHelpText := ui.formatHelpTextFor()

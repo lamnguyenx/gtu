@@ -510,7 +510,7 @@ func TestSecondCtrlCWhileScanStoppingQuits(t *testing.T) {
 	// first Ctrl+C stops the scan and keeps the results
 	assert.Nil(t, ui.keyPressed(tcell.NewEventKey(tcell.KeyCtrlC, 0, 0)))
 	assert.True(t, ui.scanCancelled)
-	assert.Contains(t, ui.progress.GetText(false), "Press Ctrl+C again to quit gdu")
+	assert.Contains(t, ui.progress.GetText(false), "Press Ctrl+C again to quit gtu")
 	assert.Empty(t, buff.String())
 
 	// second Ctrl+C, while the scan is still stopping, quits

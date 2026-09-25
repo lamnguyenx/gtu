@@ -61,6 +61,10 @@ func (d *SimpleDir) GetUsage() int64 {
 	return d.Usage
 }
 
+func (d *SimpleDir) GetTokens() int64 {
+	return 0
+}
+
 func (d *SimpleDir) GetSize() int64 {
 	return d.Size
 }
@@ -81,7 +85,7 @@ func (d *SimpleDir) GetParent() fs.Item                                  { panic
 func (d *SimpleDir) SetParent(parent fs.Item)                            { panic("not implemented") }
 func (d *SimpleDir) GetMultiLinkedInode() uint64                         { panic("not implemented") }
 func (d *SimpleDir) EncodeJSON(io.Writer, bool, fs.JSONAttributes) error { panic("not implemented") }
-func (d *SimpleDir) GetItemStats(linkedItems fs.HardLinkedItems, filteringFiles bool) (itemCount, size, usage int64) {
+func (d *SimpleDir) GetItemStats(linkedItems fs.HardLinkedItems, filteringFiles bool) (itemCount, size, usage, tokens int64) {
 	panic("not implemented")
 }
 

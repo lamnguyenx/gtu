@@ -26,6 +26,7 @@ type File struct {
 	Symlink string
 	Size    int64
 	Usage   int64
+	Tokens  int64
 	Mli     uint64
 	Flag    rune
 }
@@ -70,6 +71,11 @@ func (f *File) GetSize() int64 {
 // GetUsage returns usage of the file
 func (f *File) GetUsage() int64 {
 	return f.Usage
+}
+
+// GetTokens returns estimated token count of the file
+func (f *File) GetTokens() int64 {
+	return f.Tokens
 }
 
 // GetMtime returns mtime of the file
@@ -131,12 +137,12 @@ func CreateFileItem(name string, info os.FileInfo) *File {
 	return file
 }
 
-// GetItemStats returns 1 as count of items, apparent usage and real usage of this file
-func (f *File) GetItemStats(linkedItems fs.HardLinkedItems, filteringFiles bool) (itemCount, size, usage int64) {
+// GetItemStats returns 1 as count of items, apparent usage, real usage and token count of this file
+func (f *File) GetItemStats(linkedItems fs.HardLinkedItems, filteringFiles bool) (itemCount, size, usage, tokens int64) {
 	if f.alreadyCounted(linkedItems) {
-		return 1, 0, 0
+		return 1, 0, 0, 0
 	}
-	return 1, f.GetSize(), f.GetUsage()
+	return 1, f.GetSize(), f.GetUsage(), f.GetTokens()
 }
 
 // UpdateStats does nothing on file
@@ -189,6 +195,7 @@ const EmptyDirSize int64 = 512
 type dirTotals struct {
 	size      int64
 	usage     int64
+	tokens    int64
 	itemCount int64
 	entries   int
 	hasFiles  bool
@@ -205,14 +212,14 @@ type dirTotals struct {
 //
 // This is the single definition of that rule. Every analyzer must route through
 // it, otherwise the numbers gdu reports depend on which analyzer produced them.
-func resolveDirStats(totals dirTotals, filteringFiles bool) (itemCount, size, usage int64) {
+func resolveDirStats(totals dirTotals, filteringFiles bool) (itemCount, size, usage, tokens int64) {
 	onlyEmptyDirs := !totals.hasFiles && filteringFiles &&
 		totals.itemCount == int64(totals.entries+1)
 
 	if totals.entries == 0 || onlyEmptyDirs {
-		return 1, totals.size + EmptyDirSize, 0
+		return 1, totals.size + EmptyDirSize, 0, totals.tokens
 	}
-	return totals.itemCount, totals.size, totals.usage
+	return totals.itemCount, totals.size, totals.usage, totals.tokens
 }
 
 // aggregateDirEntries folds the stats of entries into the totals their parent
@@ -228,9 +235,10 @@ func aggregateDirEntries(
 	totals = dirTotals{itemCount: 1, entries: len(entries)}
 
 	for _, entry := range entries {
-		count, size, usage := entry.GetItemStats(linkedItems, filteringFiles)
+		count, size, usage, tokens := entry.GetItemStats(linkedItems, filteringFiles)
 		totals.size += size
 		totals.usage += usage
+		totals.tokens += tokens
 		totals.itemCount += count
 
 		if entryMtime := entry.GetMtime(); entryMtime.After(mtime) {
@@ -271,6 +279,7 @@ func snapshotDir(source *Dir, parent fs.Item) *Dir {
 			Name:   source.Name,
 			Size:   source.Size,
 			Usage:  source.Usage,
+			Tokens: source.Tokens,
 			Mli:    source.Mli,
 			Flag:   source.Flag,
 		},
@@ -342,6 +351,7 @@ func snapshotFile(source, parent fs.Item) *File {
 		Name:   source.GetName(),
 		Size:   source.GetSize(),
 		Usage:  source.GetUsage(),
+		Tokens: source.GetTokens(),
 		Mli:    source.GetMultiLinkedInode(),
 		Flag:   source.GetFlag(),
 	}
@@ -471,10 +481,10 @@ func (f *Dir) GetPath() string {
 	return f.Name
 }
 
-// GetItemStats returns item count, apparent usage and real usage of this dir
-func (f *Dir) GetItemStats(linkedItems fs.HardLinkedItems, filteringFiles bool) (itemCount, size, usage int64) {
+// GetItemStats returns item count, apparent usage, real usage and token count of this dir
+func (f *Dir) GetItemStats(linkedItems fs.HardLinkedItems, filteringFiles bool) (itemCount, size, usage, tokens int64) {
 	f.updateStats(linkedItems, filteringFiles)
-	return f.GetItemCount(), f.GetSize(), f.GetUsage()
+	return f.GetItemCount(), f.GetSize(), f.GetUsage(), f.GetTokens()
 }
 
 func (f *Dir) UpdateStats(linkedItems fs.HardLinkedItems) {
@@ -507,7 +517,7 @@ func (f *Dir) updateStats(linkedItems fs.HardLinkedItems, filteringFiles bool) {
 	defer f.m.Unlock()
 	f.Mtime = mtime
 	f.Flag = flag
-	f.ItemCount, f.Size, f.Usage = resolveDirStats(totals, filteringFiles)
+	f.ItemCount, f.Size, f.Usage, f.Tokens = resolveDirStats(totals, filteringFiles)
 }
 
 // RemoveFile removes item from dir, updates size and item count
@@ -525,6 +535,7 @@ func (f *Dir) RemoveFile(item fs.Item) {
 // calling GetSize, GetUsage or GetItemCount on them.
 func (f *Dir) subtractStats(item fs.Item) {
 	itemCount, size, usage := item.GetItemCount(), item.GetSize(), item.GetUsage()
+	tokens := item.GetTokens()
 
 	cur := f
 	for {
@@ -532,6 +543,7 @@ func (f *Dir) subtractStats(item fs.Item) {
 		cur.ItemCount -= itemCount
 		cur.Size -= size
 		cur.Usage -= usage
+		cur.Tokens -= tokens
 		parent := cur.Parent
 		cur.m.Unlock()
 
@@ -554,6 +566,8 @@ func sortFiles(files fs.Files, sortBy fs.SortBy, order fs.SortOrder) {
 		sorter = fs.ByMtime(files)
 	case fs.SortByApparentSize:
 		sorter = fs.ByApparentSize(files)
+	case fs.SortByTokens:
+		sorter = fs.ByTokens(files)
 	case fs.SortBySize:
 		sorter = files
 	}

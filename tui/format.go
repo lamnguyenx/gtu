@@ -22,9 +22,10 @@ const (
 // on which bar is being drawn. Each field is either the sum over the sibling
 // items or, with ShowRelativeSize, the largest sibling.
 type rowMaxima struct {
-	usage int64
-	size  int64
-	count int64
+	usage  int64
+	size   int64
+	count  int64
+	tokens int64
 }
 
 // getUsagePart returns the percentage (0-100) that the given item's size or
@@ -33,11 +34,16 @@ func (ui *UI) getUsagePart(item fs.Item, maxima rowMaxima, ignored bool) float64
 	if ignored {
 		return 0
 	}
-	if ui.ShowApparentSize {
+	switch {
+	case ui.ShowTokens:
+		if tokens := item.GetTokens(); tokens > 0 && maxima.tokens > 0 {
+			return float64(tokens) / float64(maxima.tokens) * 100.0
+		}
+	case ui.ShowApparentSize:
 		if size := item.GetSize(); size > 0 {
 			return float64(size) / float64(maxima.size) * 100.0
 		}
-	} else {
+	default:
 		if usage := item.GetUsage(); usage > 0 {
 			return float64(usage) / float64(maxima.usage) * 100.0
 		}
@@ -132,9 +138,12 @@ func (ui *UI) formatColumns(statsItem fs.Item, maxima rowMaxima, marked, ignored
 
 	row := string(statsItem.GetFlag()) + numberPrefix()
 
-	if ui.ShowApparentSize {
+	switch {
+	case ui.ShowTokens:
+		row += fmt.Sprintf("%15s", formatTokens(statsItem.GetTokens()))
+	case ui.ShowApparentSize:
 		row += fmt.Sprintf("%15s", ui.formatSize(statsItem.GetSize(), false, true))
-	} else {
+	default:
 		row += fmt.Sprintf("%15s", ui.formatSize(statsItem.GetUsage(), false, true))
 	}
 
@@ -291,6 +300,22 @@ func (ui *UI) formatCount(count int64) string {
 		row += fmt.Sprintf("%d%s", count, color)
 	}
 	return row
+}
+
+func formatTokens(tokens int64) string {
+	color := defaultColor
+	t := float64(tokens)
+
+	switch {
+	case t >= common.G:
+		return fmt.Sprintf("%.1f%sG", t/float64(common.G), color)
+	case t >= common.M:
+		return fmt.Sprintf("%.1f%sM", t/float64(common.M), color)
+	case t >= common.K:
+		return fmt.Sprintf("%.1f%sk", t/float64(common.K), color)
+	default:
+		return fmt.Sprintf("%d%s", tokens, color)
+	}
 }
 
 func formatWithBinPrefix(fsize float64, color string) string {

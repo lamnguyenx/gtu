@@ -29,11 +29,11 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gdu [directory_to_scan...]",
-	Short: "Pretty fast disk usage analyzer written in Go",
-	Long: `Pretty fast disk usage analyzer written in Go.
+	Use:   "gtu [directory_to_scan...]",
+	Short: "Fast disk usage and token count analyzer written in Go",
+	Long: `Fast disk usage and token count analyzer written in Go.
 
-Gdu is intended primarily for SSD disks where it can fully utilize parallel processing.
+Gtu is intended primarily for SSD disks where it can fully utilize parallel processing.
 However HDDs work as well, but the performance gain is not so huge.
 
 More than one directory can be given, in which case they are scanned separately
@@ -48,12 +48,12 @@ and presented together under a virtual top level directory.
 func init() {
 	af = &app.Flags{Style: app.Style{ProgressModal: app.ProgressModalOpts{ShowDiskProgressBar: true}}}
 	flags := rootCmd.Flags()
-	flags.StringVar(&af.CfgFile, "config-file", "", "Read config from file (default is $HOME/.gdu.yaml)")
+	flags.StringVar(&af.CfgFile, "config-file", "", "Read config from file (default is $HOME/.gtu.yaml)")
 	flags.StringVarP(&af.LogFile, "log-file", "l", "/dev/null", "Path to a logfile")
 	flags.StringVarP(&af.OutputFile, "output-file", "o", "", "Export all info into file as JSON")
 	flags.StringVar(&af.OutputAttrs, "output-attrs", "", "Export only selected JSON attributes (name,asize,dsize,items,mtime,notreg)")
 	flags.StringVarP(&af.InputFile, "input-file", "f", "", "Import analysis from JSON file")
-	flags.IntVarP(&af.MaxCores, "max-cores", "m", runtime.NumCPU(), fmt.Sprintf("Set max cores that Gdu will use. %d cores available", runtime.NumCPU()))
+	flags.IntVarP(&af.MaxCores, "max-cores", "m", runtime.NumCPU(), fmt.Sprintf("Set max cores that Gtu will use. %d cores available", runtime.NumCPU()))
 	flags.BoolVar(&af.SequentialScanning, "sequential", false, "Use sequential scanning (intended for rotating HDDs)")
 	flags.BoolVarP(&af.ShowVersion, "version", "v", false, "Print version")
 
@@ -83,11 +83,13 @@ func init() {
 	flags.BoolVarP(&af.ReadFromStorage, "read-from-storage", "r", false, "Use existing database instead of re-scanning")
 	flags.BoolVar(&af.ArchiveBrowsing, "archive-browsing", false, "Enable browsing of zip/jar/tar archives (tar, tar.gz, tar.bz2, tar.xz)")
 	flags.BoolVar(&af.CollapsePath, "collapse-path", false, "Collapse single-child directory chains")
+	flags.BoolVar(&af.AutoGitignore, "auto-gitignore", false, "Automatically discover and honor .gitignore files (including nested ones) during scanning")
 	flags.BoolVar(&af.ShowSymlinkTarget, "show-symlink-target", false, "Show symlink target (name -> target) in the file list")
 
 	flags.BoolVarP(&af.ShowDisks, "show-disks", "d", false, "Show all mounted disks")
 	flags.BoolVarP(&af.ShowApparentSize, "show-apparent-size", "a", false, "Show apparent size")
 	flags.BoolVarP(&af.ShowRelativeSize, "show-relative-size", "B", false, "Show relative size")
+	flags.BoolVar(&af.ShowTokens, "show-tokens", true, "Count and show token estimates (default true)")
 	flags.BoolVarP(&af.NoColor, "no-color", "c", false, "Do not use colorized output")
 	flags.BoolVarP(&af.ShowItemCount, "show-item-count", "C", false, "Show number of items in directory")
 	flags.BoolVarP(&af.ShowMTime, "show-mtime", "M", false, "Show latest mtime of items in directory")
@@ -110,10 +112,10 @@ func init() {
 	flags.BoolVar(&af.NoSpawnShell, "no-spawn-shell", false, "Do not allow spawning shell")
 	flags.BoolVar(&af.NoConfirmQuit, "no-confirm-quit", false, "Do not ask for confirmation before quitting after a long scan")
 	flags.BoolVar(&af.CtrlCQuits, "ctrl-c-quits", false,
-		"Quit gdu when Ctrl+C is pressed during a scan instead of stopping the scan and keeping results (Esc always stops the scan)")
+		"Quit gtu when Ctrl+C is pressed during a scan instead of stopping the scan and keeping results (Esc always stops the scan)")
 	flags.StringVar(&af.TrashCommand, "trash-command", "",
 		"Command used to move items to trash instead of the built-in trash (e.g. 'trash-put --trash-dir ~/mytrash')")
-	flags.BoolVar(&af.WriteConfig, "write-config", false, "Write current configuration to file (default is $HOME/.gdu.yaml)")
+	flags.BoolVar(&af.WriteConfig, "write-config", false, "Write current configuration to file (default is $HOME/.gtu.yaml)")
 	flags.StringVar(
 		&af.Since, "since", "",
 		"Include files with mtime >= WHEN. WHEN accepts RFC3339 timestamp (e.g., 2025-08-11T01:00:00-07:00) "+
@@ -132,7 +134,7 @@ func init() {
 	setDefaults()
 }
 
-var systemConfigPath = "/etc/gdu.yaml"
+var systemConfigPath = "/etc/gtu.yaml"
 
 func loadConfig(path string) error {
 	data, err := os.ReadFile(path)
@@ -208,13 +210,13 @@ func setDefaultConfigFilePath() {
 		return
 	}
 
-	path := filepath.Join(home, ".config", "gdu", "gdu.yaml")
+	path := filepath.Join(home, ".config", "gtu", "gtu.yaml")
 	if _, err := os.Stat(path); err == nil {
 		af.CfgFile = path
 		return
 	}
 
-	af.CfgFile = filepath.Join(home, ".gdu.yaml")
+	af.CfgFile = filepath.Join(home, ".gtu.yaml")
 }
 
 func runE(command *cobra.Command, args []string) error {

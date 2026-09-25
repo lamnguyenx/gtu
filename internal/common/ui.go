@@ -21,6 +21,7 @@ type UI struct {
 	ShowProgress          bool
 	ShowApparentSize      bool
 	ShowRelativeSize      bool
+	ShowTokens            bool
 	FilteringFiles        bool
 	// regex fragments contributed by every pattern source (-I, -X, -G),
 	// kept so that a later source can be combined with the earlier ones

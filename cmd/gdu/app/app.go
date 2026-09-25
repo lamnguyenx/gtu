@@ -78,6 +78,7 @@ type Flags struct {
 	ShowDisks           bool      `yaml:"-"`
 	ShowApparentSize    bool      `yaml:"show-apparent-size"`
 	ShowRelativeSize    bool      `yaml:"show-relative-size"`
+	ShowTokens          bool      `yaml:"show-tokens"`
 	ShowAnnexedSize     bool      `yaml:"show-annexed-size"`
 	ShowVersion         bool      `yaml:"-"`
 	ShowItemCount       bool      `yaml:"show-item-count"`
@@ -112,8 +113,9 @@ type Flags struct {
 	Until               string    `yaml:"until"`
 	MaxAge              string    `yaml:"max-age"`
 	MinAge              string    `yaml:"min-age"`
-	ArchiveBrowsing     bool      `yaml:"archive-browsing"`
-	CollapsePath        bool      `yaml:"collapse-path"`
+	ArchiveBrowsing       bool      `yaml:"archive-browsing"`
+	CollapsePath          bool      `yaml:"collapse-path"`
+	AutoGitignore         bool      `yaml:"auto-gitignore"`
 	ShowSymlinkTarget   bool      `yaml:"show-symlink-target"`
 	CtrlCQuits          bool      `yaml:"ctrl-c-quits"`
 	BrowseParentDirs    bool      `yaml:"browse-parent-dirs"`
@@ -681,6 +683,11 @@ func (a *App) getOptions() []tui.Option {
 			ui.SetShowSymlinkTarget(true)
 		})
 	}
+	if a.Flags.AutoGitignore {
+		opts = append(opts, func(ui *tui.UI) {
+			ui.Analyzer.SetAutoGitignore(true)
+		})
+	}
 	if a.Flags.NoDelete {
 		opts = append(opts, func(ui *tui.UI) {
 			ui.SetNoDelete()
@@ -728,6 +735,9 @@ func (a *App) getOptions() []tui.Option {
 	}
 	opts = append(opts, func(ui *tui.UI) {
 		ui.SetShowDiskProgressBar(a.Flags.Style.ProgressModal.ShowDiskProgressBar)
+	})
+	opts = append(opts, func(ui *tui.UI) {
+		ui.ShowTokens = a.Flags.ShowTokens
 	})
 	return opts
 }

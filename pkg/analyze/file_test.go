@@ -399,7 +399,7 @@ func TestStatsFromJSONArePreserved(t *testing.T) {
 	assert.Equal(t, int64(2), dir.GetItemCount())
 
 	dir.UpdateStatsWithFileFiltering(make(fs.HardLinkedItems, 10))
-	count, size, usage := dir.GetItemStats(make(fs.HardLinkedItems, 10), true)
+	count, size, usage, _ := dir.GetItemStats(make(fs.HardLinkedItems, 10), true)
 	assert.Equal(t, int64(2), count)
 	assert.Equal(t, int64(4096), size)
 	assert.Equal(t, int64(2048), usage)
