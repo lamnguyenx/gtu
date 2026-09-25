@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/dundee/gdu/v5/internal/common"
+	"github.com/lamnguyenx/gtu/v2026/internal/common"
 	"github.com/stretchr/testify/assert"
 )
 

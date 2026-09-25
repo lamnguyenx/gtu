@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/dundee/gdu/v5/internal/common"
-	"github.com/dundee/gdu/v5/pkg/fs"
-	"github.com/dundee/gdu/v5/pkg/gitignore"
-	"github.com/dundee/gdu/v5/pkg/tokencount"
+	"github.com/lamnguyenx/gtu/v2026/internal/common"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/pkg/gitignore"
+	"github.com/lamnguyenx/gtu/v2026/pkg/tokencount"
 	log "github.com/sirupsen/logrus"
 )
 

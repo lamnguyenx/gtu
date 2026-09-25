@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 	"github.com/stretchr/testify/assert"
 )
 

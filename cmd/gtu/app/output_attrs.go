@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	gfs "github.com/dundee/gdu/v5/pkg/fs"
+	gfs "github.com/lamnguyenx/gtu/v2026/pkg/fs"
 )
 
 // parseJSONAttributes parses the comma-separated --output-attrs value into the

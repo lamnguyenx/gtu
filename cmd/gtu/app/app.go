@@ -17,16 +17,16 @@ import (
 	"github.com/rivo/tview"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/dundee/gdu/v5/build"
-	"github.com/dundee/gdu/v5/internal/common"
-	"github.com/dundee/gdu/v5/pkg/analyze"
-	"github.com/dundee/gdu/v5/pkg/device"
-	gfs "github.com/dundee/gdu/v5/pkg/fs"
-	"github.com/dundee/gdu/v5/pkg/timefilter"
-	"github.com/dundee/gdu/v5/report"
-	"github.com/dundee/gdu/v5/stdout"
-	"github.com/dundee/gdu/v5/tui"
-	"github.com/dundee/gdu/v5/webui"
+	"github.com/lamnguyenx/gtu/v2026/build"
+	"github.com/lamnguyenx/gtu/v2026/internal/common"
+	"github.com/lamnguyenx/gtu/v2026/pkg/analyze"
+	"github.com/lamnguyenx/gtu/v2026/pkg/device"
+	gfs "github.com/lamnguyenx/gtu/v2026/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/pkg/timefilter"
+	"github.com/lamnguyenx/gtu/v2026/report"
+	"github.com/lamnguyenx/gtu/v2026/stdout"
+	"github.com/lamnguyenx/gtu/v2026/tui"
+	"github.com/lamnguyenx/gtu/v2026/webui"
 )
 
 // UI is common interface for both terminal UI and text output

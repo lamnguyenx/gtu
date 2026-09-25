@@ -1,7 +1,7 @@
 package analyze
 
 import (
-	"github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 )
 
 // TopList is a list of top largest files

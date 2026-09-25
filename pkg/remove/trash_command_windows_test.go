@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/dundee/gdu/v5/pkg/analyze"
+	"github.com/lamnguyenx/gtu/v2026/pkg/analyze"
 )
 
 func TestTrashCommandNotSupported(t *testing.T) {

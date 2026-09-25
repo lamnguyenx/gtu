@@ -9,8 +9,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/dundee/gdu/v5/pkg/analyze"
-	"github.com/dundee/gdu/v5/pkg/remove"
+	"github.com/lamnguyenx/gtu/v2026/pkg/analyze"
+	"github.com/lamnguyenx/gtu/v2026/pkg/remove"
 )
 
 // statusResponse describes the current scan state and display preferences.

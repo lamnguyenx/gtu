@@ -15,8 +15,8 @@ import (
 	"github.com/rivo/tview"
 	"github.com/ulikunitz/xz"
 
-	"github.com/dundee/gdu/v5/build"
-	"github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/build"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 )
 
 func (ui *UI) showFile() *tview.TextView {

@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dundee/gdu/v5/internal/common"
-	"github.com/dundee/gdu/v5/internal/testdir"
+	"github.com/lamnguyenx/gtu/v2026/internal/common"
+	"github.com/lamnguyenx/gtu/v2026/internal/testdir"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

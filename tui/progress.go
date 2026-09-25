@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/dundee/gdu/v5/internal/common"
+	"github.com/lamnguyenx/gtu/v2026/internal/common"
 )
 
 // stopScanHint returns the progress modal line telling the user how to stop

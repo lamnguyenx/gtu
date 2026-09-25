@@ -1,4 +1,4 @@
-module github.com/dundee/gdu/v5
+module github.com/lamnguyenx/gtu/v2026
 
 go 1.26.0
 

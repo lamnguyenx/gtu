@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dundee/gdu/v5/internal/common"
-	"github.com/dundee/gdu/v5/internal/testdir"
-	"github.com/dundee/gdu/v5/pkg/analyze"
+	"github.com/lamnguyenx/gtu/v2026/internal/common"
+	"github.com/lamnguyenx/gtu/v2026/internal/testdir"
+	"github.com/lamnguyenx/gtu/v2026/pkg/analyze"
 	"github.com/stretchr/testify/assert"
 )
 

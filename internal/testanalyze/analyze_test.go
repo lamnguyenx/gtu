@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dundee/gdu/v5/internal/common"
-	"github.com/dundee/gdu/v5/pkg/analyze"
-	"github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/internal/common"
+	"github.com/lamnguyenx/gtu/v2026/pkg/analyze"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 	"github.com/stretchr/testify/assert"
 )
 

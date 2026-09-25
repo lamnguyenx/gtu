@@ -8,8 +8,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/dundee/gdu/v5/pkg/analyze"
-	"github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/pkg/analyze"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 )
 
 // errNotFound is returned when a requested path is not present in the tree.

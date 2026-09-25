@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 )
 
 var concurrencyLimit = make(chan struct{}, 3*runtime.GOMAXPROCS(0))

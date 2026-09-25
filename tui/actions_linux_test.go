@@ -6,8 +6,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/dundee/gdu/v5/internal/testapp"
-	"github.com/dundee/gdu/v5/pkg/device"
+	"github.com/lamnguyenx/gtu/v2026/internal/testapp"
+	"github.com/lamnguyenx/gtu/v2026/pkg/device"
 	"github.com/stretchr/testify/assert"
 )
 

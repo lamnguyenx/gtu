@@ -5,7 +5,7 @@ package remove
 import (
 	"fmt"
 
-	"github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 )
 
 // MoveItemToTrash is not supported on Windows; use Unix XDG trash builds instead.

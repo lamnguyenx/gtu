@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/dundee/gdu/v5/cmd/gdu/app"
+	"github.com/lamnguyenx/gtu/v2026/cmd/gtu/app"
 )
 
 func TestNoViewFileFlagRegistered(t *testing.T) {

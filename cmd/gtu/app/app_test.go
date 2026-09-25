@@ -15,12 +15,12 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/dundee/gdu/v5/internal/common"
-	"github.com/dundee/gdu/v5/internal/testapp"
-	"github.com/dundee/gdu/v5/internal/testdev"
-	"github.com/dundee/gdu/v5/internal/testdir"
-	"github.com/dundee/gdu/v5/pkg/device"
-	gfs "github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/internal/common"
+	"github.com/lamnguyenx/gtu/v2026/internal/testapp"
+	"github.com/lamnguyenx/gtu/v2026/internal/testdev"
+	"github.com/lamnguyenx/gtu/v2026/internal/testdir"
+	"github.com/lamnguyenx/gtu/v2026/pkg/device"
+	gfs "github.com/lamnguyenx/gtu/v2026/pkg/fs"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 )
 
 // fileFlagMu protects the mutable Flag field on published File values. File

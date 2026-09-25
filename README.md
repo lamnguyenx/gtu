@@ -11,16 +11,22 @@ Tokens are counted for text files (via BPE tokenization) and images (via
 dimension-based vision formula — PNG/JPEG/GIF/WebP/BMP). Binary files and
 documents are skipped.
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/dundee/gdu)](https://goreportcard.com/report/github.com/dundee/gdu)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lamnguyenx/gtu)](https://goreportcard.com/report/github.com/lamnguyenx/gtu)
 
 ## Installation
 
-Binary releases are on the [releases page](https://github.com/dundee/gdu/releases).
+Install with `go install`:
+
+```
+go install github.com/lamnguyenx/gtu/v2026/cmd/gtu@latest
+```
+
+Binary releases are on the [releases page](https://github.com/lamnguyenx/gtu/releases).
 Build from source:
 
 ```
-git clone https://github.com/dundee/gdu
-cd gdu
+git clone https://github.com/lamnguyenx/gtu
+cd gtu
 make build
 ./dist/gtu
 ```

@@ -1,8 +1,6 @@
 NAME := gtu
-MODULE := gdu
-MAJOR_VER := v5
-PACKAGE := github.com/dundee/$(MODULE)/$(MAJOR_VER)
-CMD_GDU := cmd/gdu
+PACKAGE := github.com/lamnguyenx/gtu/v2026
+CMD_GTU := cmd/gtu
 VERSION := $(shell git describe --tags 2>/dev/null)
 NAMEVER := $(NAME)-$(subst v,,$(VERSION))
 DATE := $(shell date +'%Y-%m-%d')
@@ -21,7 +19,7 @@ endif
 all: clean tarball build-all build-docker man clean-uncompressed-dist shasums
 
 run:
-	go run $(PACKAGE)/$(CMD_GDU)
+	go run $(PACKAGE)/$(CMD_GTU)
 
 vendor: go.mod go.sum
 	go mod vendor
@@ -33,12 +31,12 @@ tarball: vendor
 build:
 	@echo "Version: " $(VERSION)
 	mkdir -p dist
-	GOFLAGS="$(GOFLAGS)" CGO_ENABLED=0 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/$(NAME) $(PACKAGE)/$(CMD_GDU)
+	GOFLAGS="$(GOFLAGS)" CGO_ENABLED=0 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/$(NAME) $(PACKAGE)/$(CMD_GTU)
 
 build-static:
 	@echo "Version: " $(VERSION)
 	mkdir -p dist
-	GOFLAGS="$(GOFLAGS_STATIC)" CGO_ENABLED=0 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/$(NAME) $(PACKAGE)/$(CMD_GDU)
+	GOFLAGS="$(GOFLAGS_STATIC)" CGO_ENABLED=0 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/$(NAME) $(PACKAGE)/$(CMD_GTU)
 
 # build-web compiles and minifies the React web UI into webui/dist, which is
 # committed and embedded into the binary. Requires Node.js. Pure-Go builds
@@ -48,7 +46,7 @@ build-web:
 
 build-docker:
 	@echo "Version: " $(VERSION)
-	docker build . --tag ghcr.io/dundee/gtu:$(VERSION)
+	docker build . --tag ghcr.io/lamnguyenx/gtu:$(VERSION)
 
 build-all:
 	@echo "Version: " $(VERSION)
@@ -58,29 +56,29 @@ build-all:
 		-arch="amd64 arm64" \
 		-output="dist/gtu_{{.OS}}_{{.Arch}}" \
 		-ldflags="$(LDFLAGS)" \
-		$(PACKAGE)/$(CMD_GDU)
+		$(PACKAGE)/$(CMD_GTU)
 
 	CGO_ENABLED=0 gox \
 		-os="windows" \
 		-arch="amd64" \
 		-output="dist/gtu_{{.OS}}_{{.Arch}}" \
 		-ldflags="$(LDFLAGS)" \
-		$(PACKAGE)/$(CMD_GDU)
+		$(PACKAGE)/$(CMD_GTU)
 
 	CGO_ENABLED=0 gox \
 		-os="linux freebsd netbsd openbsd" \
 		-output="dist/gtu_{{.OS}}_{{.Arch}}" \
 		-ldflags="$(LDFLAGS)" \
-		$(PACKAGE)/$(CMD_GDU)
+		$(PACKAGE)/$(CMD_GTU)
 
-	GOFLAGS="$(GOFLAGS)" CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_amd64 $(PACKAGE)/$(CMD_GDU)
-	GOFLAGS="$(GOFLAGS_STATIC)" CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_amd64_static $(PACKAGE)/$(CMD_GDU)
+	GOFLAGS="$(GOFLAGS)" CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_amd64 $(PACKAGE)/$(CMD_GTU)
+	GOFLAGS="$(GOFLAGS_STATIC)" CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_amd64_static $(PACKAGE)/$(CMD_GTU)
 
-	CGO_ENABLED=0 GOOS=linux GOARM=5 GOARCH=arm $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_armv5l $(PACKAGE)/$(CMD_GDU)
-	CGO_ENABLED=0 GOOS=linux GOARM=6 GOARCH=arm $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_armv6l $(PACKAGE)/$(CMD_GDU)
-	CGO_ENABLED=0 GOOS=linux GOARM=7 GOARCH=arm $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_armv7l $(PACKAGE)/$(CMD_GDU)
-	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_arm64 $(PACKAGE)/$(CMD_GDU)
-	CGO_ENABLED=0 GOOS=android GOARCH=arm64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_android_arm64 $(PACKAGE)/$(CMD_GDU)
+	CGO_ENABLED=0 GOOS=linux GOARM=5 GOARCH=arm $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_armv5l $(PACKAGE)/$(CMD_GTU)
+	CGO_ENABLED=0 GOOS=linux GOARM=6 GOARCH=arm $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_armv6l $(PACKAGE)/$(CMD_GTU)
+	CGO_ENABLED=0 GOOS=linux GOARM=7 GOARCH=arm $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_armv7l $(PACKAGE)/$(CMD_GTU)
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_linux_arm64 $(PACKAGE)/$(CMD_GTU)
+	CGO_ENABLED=0 GOOS=android GOARCH=arm64 $(GOBIN) build -ldflags="$(LDFLAGS)" -o dist/gtu_android_arm64 $(PACKAGE)/$(CMD_GTU)
 
 	cd dist; for file in gtu_linux_* gtu_darwin_* gtu_netbsd_* gtu_openbsd_* gtu_freebsd_* gtu_android_*; do tar czf $$file.tgz $$file; done
 	cd dist; for file in gtu_windows_*; do zip $$file.zip $$file; done
@@ -191,7 +189,7 @@ shasums:
 	cd dist; gpg --sign --armor --detach-sign sha256sums.txt
 
 release:
-	gh release create -t "gdu $(VERSION)" $(VERSION) ./dist/*
+	gh release create -t "gtu $(VERSION)" $(VERSION) ./dist/*
 
 install-dev-dependencies:
 	$(GOBIN) install gotest.tools/gotestsum@latest

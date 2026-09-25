@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/dundee/gdu/v5/pkg/analyze"
-	"github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/pkg/analyze"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/stretchr/testify/assert"

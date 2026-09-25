@@ -5,7 +5,7 @@ package remove
 import (
 	"fmt"
 
-	"github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/lamnguyenx/gtu/v2026/pkg/fs"
 )
 
 // TrashCommand is not supported on Windows, which has no POSIX shell to

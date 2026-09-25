@@ -18,7 +18,7 @@ make install-dev-dependencies
 
 ## Project layout
 
-- `cmd/gdu` — CLI entrypoint and flag wiring.
+- `cmd/gtu` — CLI entrypoint and flag wiring.
 - `pkg/` — reusable libraries: `analyze`, `device`, `fs`, `path`, `remove`,
   `timefilter`, `annex`.
 - `stdout/`, `report/`, `tui/` — output backends (non-interactive stdout, JSON

@@ -43,9 +43,9 @@
 
     binenv install gdu
 
-[Go](https://pkg.go.dev/github.com/dundee/gdu):
+[Go](https://pkg.go.dev/github.com/lamnguyenx/gtu/v2026):
 
-    go install github.com/dundee/gdu/v5/cmd/gdu@latest
+    go install github.com/lamnguyenx/gtu/v2026/cmd/gtu@latest
 
 [Winget](https://github.com/microsoft/winget-pkgs/tree/master/manifests/d/dundee/gdu) (for Windows users):
 

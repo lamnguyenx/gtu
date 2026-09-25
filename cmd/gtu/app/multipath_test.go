@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/dundee/gdu/v5/internal/testdev"
-	"github.com/dundee/gdu/v5/internal/testdir"
+	"github.com/lamnguyenx/gtu/v2026/internal/testdev"
+	"github.com/lamnguyenx/gtu/v2026/internal/testdir"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

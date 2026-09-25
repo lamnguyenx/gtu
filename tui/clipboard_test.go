@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/dundee/gdu/v5/internal/testapp"
+	"github.com/lamnguyenx/gtu/v2026/internal/testapp"
 )
 
 func lookPathFor(names ...string) func(string) (string, error) {

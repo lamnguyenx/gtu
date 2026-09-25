@@ -10,11 +10,11 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/dundee/gdu/v5/internal/testanalyze"
-	"github.com/dundee/gdu/v5/internal/testdev"
-	"github.com/dundee/gdu/v5/internal/testdir"
-	"github.com/dundee/gdu/v5/pkg/analyze"
-	"github.com/dundee/gdu/v5/pkg/device"
+	"github.com/lamnguyenx/gtu/v2026/internal/testanalyze"
+	"github.com/lamnguyenx/gtu/v2026/internal/testdev"
+	"github.com/lamnguyenx/gtu/v2026/internal/testdir"
+	"github.com/lamnguyenx/gtu/v2026/pkg/analyze"
+	"github.com/lamnguyenx/gtu/v2026/pkg/device"
 	"github.com/stretchr/testify/assert"
 )
 

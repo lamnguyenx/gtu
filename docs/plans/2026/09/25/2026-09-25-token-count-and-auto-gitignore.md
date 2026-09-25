@@ -85,7 +85,7 @@ The `'a'` key now cycles through three display modes:
 
 ### 5. Binary rename: `gdu` → `gtu`
 
-Binary name, user-facing strings, and config paths updated. Go module path (`github.com/dundee/gdu/v5`) left intact to avoid breaking imports.
+Binary name, user-facing strings, and config paths updated. Go module path (`github.com/lamnguyenx/gtu/v2026`) left intact to avoid breaking imports.
 
 | Changed | Old | New |
 |---|---|---|
@@ -181,7 +181,7 @@ Added `pkg/analyze/gitignore_test.go` with 5 tests:
 ## Test results
 
 ```
-✓ github.com/dundee/gdu/v5 (all 21 packages pass)
+✓ github.com/lamnguyenx/gtu/v2026 (all 21 packages pass)
   pkg/gitignore: 17 unit tests, 0 failures
   pkg/analyze: 5 integration tests, 0 failures
   Full suite: 0 failures across all packages
