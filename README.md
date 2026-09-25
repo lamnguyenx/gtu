@@ -32,7 +32,7 @@ make build
 
 Flags:
       --archive-browsing               Enable browsing of zip/jar/tar archives
-      --auto-gitignore                 Honor .gitignore files (including nested ones) during scanning
+      --auto-gitignore                 Honor .gitignore files (including nested ones) during scanning (default true)
       --collapse-path                  Collapse single-child directory chains
       --config-file string             Read config from file (default is $HOME/.gtu.yaml)
       --ctrl-c-quits                   Quit gtu when Ctrl+C is pressed during a scan
@@ -112,7 +112,7 @@ Basic list of actions in interactive mode:
 ```
 gtu                                   # analyze current dir (shows token counts by default)
 gtu --show-tokens=false               # analyze with traditional disk usage display
-gtu --auto-gitignore /                # scan / and honor .gitignore files automatically
+gtu --auto-gitignore=false /          # disable .gitignore honoring
 gtu --show-tokens=false -a            # show apparent size instead of disk usage
 gtu --no-delete                       # prevent write operations
 gtu ~/projects/alpha ~/projects/beta  # analyze several dirs at once
@@ -121,7 +121,7 @@ gtu -i /sys,/proc /                   # ignore some paths
 gtu -I '.*[abc]+'                     # ignore paths by regular pattern
 gtu -X ignore_file /                  # ignore paths by regular patterns from file
 gtu -G .gitignore /                   # ignore dirs by .gitignore-style patterns from file
-gtu -G .gitignore --auto-gitignore /  # explicit + auto .gitignore combined
+gtu --auto-gitignore=false -G .gitignore /  # explicit .gitignore only, no auto-discovery
 gtu -n /                              # only print stats, do not start interactive mode
 gtu --reverse-sort -n /               # print files sorted smallest to largest
 gtu -o- / | gzip -c >report.json.gz   # write all info to JSON
@@ -147,11 +147,12 @@ disables token counting and restores the original disk-usage-first behavior.
 
 ## Automatic .gitignore support
 
-Use `--auto-gitignore` to make gtu automatically discover and honor `.gitignore`
-files during scanning:
+By default gtu automatically discovers and honors `.gitignore` files during
+scanning. Use `--auto-gitignore=false` to disable:
 
 ```
-gtu --auto-gitignore ~/projects/myapp
+gtu ~/projects/myapp                   # .gitignore honored by default
+gtu --auto-gitignore=false ~/projects  # disable .gitignore honoring
 ```
 
 This works recursively: if a subdirectory has its own `.gitignore`, those
@@ -162,7 +163,7 @@ last-match-wins semantics (a child can un-ignore files a parent ignored).
 Combined with the explicit `-G` flag:
 
 ```
-gtu --auto-gitignore -G /path/to/extra.gitignore /some/dir
+gtu -G /path/to/extra.gitignore /some/dir
 ```
 
 ## Modes

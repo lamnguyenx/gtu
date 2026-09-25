@@ -26,6 +26,7 @@ type BaseAnalyzer struct {
 	matchesTimeFilterFn     common.TimeFilter
 	archiveBrowsing         bool
 	autoGitignore           bool
+	ignoreTokens            bool
 	progressTicker          *time.Ticker
 }
 
@@ -84,6 +85,11 @@ func (a *BaseAnalyzer) SetArchiveBrowsing(v bool) {
 // the directory walk.
 func (a *BaseAnalyzer) SetAutoGitignore(v bool) {
 	a.autoGitignore = v
+}
+
+// SetIgnoreTokens disables token counting during the scan when set to true.
+func (a *BaseAnalyzer) SetIgnoreTokens(v bool) {
+	a.ignoreTokens = v
 }
 
 // SetFileTypeFilter sets the file type filter function

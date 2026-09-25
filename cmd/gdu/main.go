@@ -83,7 +83,7 @@ func init() {
 	flags.BoolVarP(&af.ReadFromStorage, "read-from-storage", "r", false, "Use existing database instead of re-scanning")
 	flags.BoolVar(&af.ArchiveBrowsing, "archive-browsing", false, "Enable browsing of zip/jar/tar archives (tar, tar.gz, tar.bz2, tar.xz)")
 	flags.BoolVar(&af.CollapsePath, "collapse-path", false, "Collapse single-child directory chains")
-	flags.BoolVar(&af.AutoGitignore, "auto-gitignore", false, "Automatically discover and honor .gitignore files (including nested ones) during scanning")
+	flags.BoolVar(&af.AutoGitignore, "auto-gitignore", true, "Honor .gitignore files (including nested ones) during scanning (default true)")
 	flags.BoolVar(&af.ShowSymlinkTarget, "show-symlink-target", false, "Show symlink target (name -> target) in the file list")
 
 	flags.BoolVarP(&af.ShowDisks, "show-disks", "d", false, "Show all mounted disks")

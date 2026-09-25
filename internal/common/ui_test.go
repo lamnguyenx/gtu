@@ -111,6 +111,8 @@ func (a *MockedAnalyzer) SetArchiveBrowsing(v bool) {
 
 func (a *MockedAnalyzer) SetAutoGitignore(v bool) {}
 
+func (a *MockedAnalyzer) SetIgnoreTokens(v bool) {}
+
 func TestSetBlockSizeFromEnvironment(t *testing.T) {
 	t.Run("BLOCK_SIZE takes precedence", func(t *testing.T) {
 		t.Setenv("BLOCK_SIZE", "1K")

@@ -210,6 +210,55 @@ func TestEmptyStack(t *testing.T) {
 	assert.False(t, s.Match("/whatever", false))
 }
 
+func TestMergeFromDirSubmoduleGitFile(t *testing.T) {
+	root := t.TempDir()
+
+	// parent .gitignore
+	require.NoError(t, os.WriteFile(filepath.Join(root, ".gitignore"), []byte("*.log\n"), 0o644))
+
+	// submodule dir
+	subDir := filepath.Join(root, "submodule")
+	require.NoError(t, os.MkdirAll(subDir, 0o755))
+
+	// submodule .gitignore
+	require.NoError(t, os.WriteFile(filepath.Join(subDir, ".gitignore"), []byte("*.bak\n"), 0o644))
+
+	// submodule .git is a file (gitdir: pointer) pointing to parent .git/modules/sub
+	modulesGit := filepath.Join(root, ".git", "modules", "sub", "info")
+	require.NoError(t, os.MkdirAll(modulesGit, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(modulesGit, "exclude"), []byte("secret/\n"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(subDir, ".git"), []byte("gitdir: ../.git/modules/sub\n"), 0o644))
+
+	// Use MergeFromDirWithEntries like the analyzer does
+	entries, err := os.ReadDir(subDir)
+	require.NoError(t, err)
+	m, err := MergeFromDirWithEntries(subDir, entries)
+	require.NoError(t, err)
+	require.NotNil(t, m)
+
+	// .gitignore patterns work
+	assert.True(t, m.Match("old.bak", false), "*.bak from submodule .gitignore")
+	// exclude patterns work (loaded via gitdir: pointer)
+	assert.True(t, m.Match("secret/file.txt", false), "secret/ from resolved .git/info/exclude")
+	// non-matching
+	assert.False(t, m.Match("keep.go", false))
+}
+
+func TestResolveGitDirFile(t *testing.T) {
+	dir := t.TempDir()
+
+	// Regular .git directory
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, ".git"), 0o755))
+	assert.NotEmpty(t, resolveGitDir(dir))
+
+	// Submodule-style .git file
+	require.NoError(t, os.RemoveAll(filepath.Join(dir, ".git")))
+	target := filepath.Join(dir, "target")
+	require.NoError(t, os.MkdirAll(target, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".git"), []byte("gitdir: target\n"), 0o644))
+	assert.Equal(t, target, resolveGitDir(dir))
+}
+
 // mustPattern compiles a pattern, panicking on error (test helper).
 func mustPattern(line string) Pattern {
 	p, err := compilePattern(line)

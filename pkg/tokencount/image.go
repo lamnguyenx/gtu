@@ -237,8 +237,8 @@ func readWebpDimensions(path string) (int, int, bool) {
 			return 0, 0, false
 		}
 		b := header[21]
-		width := 1 + int(binary.LittleEndian.Uint16([]byte{header[22], b&0x3F<<2}))
-		height := 1 + int(binary.LittleEndian.Uint16([]byte{header[24], header[23]&0x0F<<4}))
+		width := 1 + int(binary.LittleEndian.Uint16([]byte{header[22], b & 0x3F << 2}))
+		height := 1 + int(binary.LittleEndian.Uint16([]byte{header[24], header[23] & 0x0F << 4}))
 		return width, height, true
 	case "VP8X":
 		width := 1 + int(binary.LittleEndian.Uint32([]byte{header[24], header[25], header[26], 0}))

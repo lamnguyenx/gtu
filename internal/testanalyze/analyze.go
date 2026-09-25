@@ -110,6 +110,8 @@ func (a *MockedAnalyzer) SetArchiveBrowsing(v bool) {}
 
 func (a *MockedAnalyzer) SetAutoGitignore(v bool) {}
 
+func (a *MockedAnalyzer) SetIgnoreTokens(v bool) {}
+
 // SetFileTypeFilter does nothing
 func (a *MockedAnalyzer) SetFileTypeFilter(fileTypeFilter common.ShouldFileBeIgnored) {}
 

@@ -113,9 +113,9 @@ type Flags struct {
 	Until               string    `yaml:"until"`
 	MaxAge              string    `yaml:"max-age"`
 	MinAge              string    `yaml:"min-age"`
-	ArchiveBrowsing       bool      `yaml:"archive-browsing"`
-	CollapsePath          bool      `yaml:"collapse-path"`
-	AutoGitignore         bool      `yaml:"auto-gitignore"`
+	ArchiveBrowsing     bool      `yaml:"archive-browsing"`
+	CollapsePath        bool      `yaml:"collapse-path"`
+	AutoGitignore       bool      `yaml:"auto-gitignore"`
 	ShowSymlinkTarget   bool      `yaml:"show-symlink-target"`
 	CtrlCQuits          bool      `yaml:"ctrl-c-quits"`
 	BrowseParentDirs    bool      `yaml:"browse-parent-dirs"`
@@ -498,6 +498,8 @@ func (a *App) createUI(outputAttributes gfs.JSONAttributes) (UI, error) {
 		if a.Flags.TrashCommand != "" {
 			webUI.SetTrashCommand(a.Flags.TrashCommand)
 		}
+		webUI.Analyzer.SetAutoGitignore(a.Flags.AutoGitignore)
+		webUI.Analyzer.SetIgnoreTokens(!a.Flags.ShowTokens)
 		ui = webUI
 	case a.Flags.OutputFile != "":
 		var output io.Writer
@@ -509,7 +511,7 @@ func (a *App) createUI(outputAttributes gfs.JSONAttributes) (UI, error) {
 				return nil, fmt.Errorf("opening output file: %w", err)
 			}
 		}
-		ui = report.CreateExportUI(
+		exportUI := report.CreateExportUI(
 			a.Writer,
 			output,
 			!a.Flags.NoColor && a.Istty,
@@ -520,6 +522,9 @@ func (a *App) createUI(outputAttributes gfs.JSONAttributes) (UI, error) {
 			a.Flags.Summarize,
 			outputAttributes,
 		)
+		exportUI.Analyzer.SetAutoGitignore(a.Flags.AutoGitignore)
+		exportUI.Analyzer.SetIgnoreTokens(!a.Flags.ShowTokens)
+		ui = exportUI
 	case a.Flags.ShouldRunInNonInteractiveMode(a.Istty):
 		fixedUnit := ""
 		if a.Flags.ShowInKiB {
@@ -548,7 +553,9 @@ func (a *App) createUI(outputAttributes gfs.JSONAttributes) (UI, error) {
 		if a.Flags.ShowSymlinkTarget {
 			stdoutUI.SetShowSymlinkTarget(true)
 		}
-		ui = stdoutUI
+	stdoutUI.Analyzer.SetAutoGitignore(a.Flags.AutoGitignore)
+	stdoutUI.Analyzer.SetIgnoreTokens(!a.Flags.ShowTokens)
+	ui = stdoutUI
 	default:
 		opts := a.getOptions()
 
@@ -686,6 +693,11 @@ func (a *App) getOptions() []tui.Option {
 	if a.Flags.AutoGitignore {
 		opts = append(opts, func(ui *tui.UI) {
 			ui.Analyzer.SetAutoGitignore(true)
+		})
+	}
+	if !a.Flags.ShowTokens {
+		opts = append(opts, func(ui *tui.UI) {
+			ui.Analyzer.SetIgnoreTokens(true)
 		})
 	}
 	if a.Flags.NoDelete {

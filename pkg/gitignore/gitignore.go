@@ -63,9 +63,14 @@ func LoadFromDir(dir string) (*Matcher, error) {
 	return LoadFromFile(dir, giPath)
 }
 
-// LoadGitExclude loads the .git/info/exclude file if present.
+// LoadGitExclude loads the info/exclude file from the git metadata directory,
+// handling both regular .git/ dirs and submodule .git files (gitdir: pointers).
 func LoadGitExclude(dir string) (*Matcher, error) {
-	excludePath := filepath.Join(dir, ".git", "info", "exclude")
+	gitDir := resolveGitDir(dir)
+	if gitDir == "" {
+		return nil, nil
+	}
+	excludePath := filepath.Join(gitDir, "info", "exclude")
 	if _, err := os.Stat(excludePath); err != nil {
 		return nil, nil
 	}
@@ -113,10 +118,20 @@ func (m *Matcher) merge(other *Matcher) {
 // semantics across the whole stack (correct Git behavior: a child .gitignore
 // can un-ignore what a parent ignored).
 func (s Stack) Match(fullPath string, isDir bool) bool {
-	cleanPath := filepath.Clean(fullPath)
 	ignored := false
 	for _, m := range s {
-		rel, err := filepath.Rel(m.baseDir, cleanPath)
+		// Skip matchers whose baseDir is not an ancestor of fullPath.
+		// This avoids the filepath.Rel call on most matchers for deeply
+		// nested files where the stack has multiple levels.
+		bd := m.baseDir
+		if len(fullPath) <= len(bd) {
+			if fullPath != bd {
+				continue
+			}
+		} else if fullPath[len(bd)] != os.PathSeparator || !strings.HasPrefix(fullPath, bd) {
+			continue
+		}
+		rel, err := filepath.Rel(bd, fullPath)
 		if err != nil {
 			continue
 		}
@@ -142,7 +157,7 @@ func (s Stack) Push(m *Matcher) Stack {
 	return result
 }
 
-// MergeLoader loads .gitignore, .git/info/exclude from a directory and merges
+// MergeFromDir loads .gitignore and .git/info/exclude from a directory and merges
 // them into a single Matcher.
 func MergeFromDir(dir string) (*Matcher, error) {
 	m, err := LoadFromDir(dir)
@@ -158,6 +173,73 @@ func MergeFromDir(dir string) (*Matcher, error) {
 	}
 	m.merge(ex)
 	return m, nil
+}
+
+// MergeFromDirWithEntries is like MergeFromDir but uses an existing directory
+// listing to check for .git/ existence, avoiding a stat syscall on every
+// directory that doesn't have a .git/ (i.e. every non-root subdirectory).
+// Handles submodule .git files (gitdir: pointers) in addition to regular
+// .git/ directories.
+func MergeFromDirWithEntries(dir string, entries []os.DirEntry) (*Matcher, error) {
+	m, err := LoadFromDir(dir)
+	if err != nil {
+		return nil, err
+	}
+	for _, e := range entries {
+		if e.Name() == ".git" {
+			gitDir := resolveGitDir(dir)
+			if gitDir == "" {
+				break
+			}
+			excludePath := filepath.Join(gitDir, "info", "exclude")
+			if _, err := os.Stat(excludePath); err == nil {
+				ex, err := LoadFromFile(dir, excludePath)
+				if err == nil && ex != nil {
+					if m == nil {
+						return ex, nil
+					}
+					m.merge(ex)
+				}
+			}
+			break
+		}
+	}
+	return m, nil
+}
+
+// resolveGitDir returns the absolute path to the git metadata directory for the
+// given working directory. Handles:
+//   - regular .git/ directory          → dir/.git
+//   - submodule .git file (gitdir:)    → resolves the pointer
+func resolveGitDir(dir string) string {
+	dotGit := filepath.Join(dir, ".git")
+	info, err := os.Stat(dotGit)
+	if err != nil {
+		return ""
+	}
+	if info.IsDir() {
+		return dotGit
+	}
+
+	// Submodule: .git is a file containing "gitdir: <path>"
+	data, err := os.ReadFile(dotGit)
+	if err != nil {
+		return ""
+	}
+	line := strings.TrimSpace(string(data))
+	const prefix = "gitdir:"
+	if !strings.HasPrefix(line, prefix) {
+		return ""
+	}
+	gitPath := strings.TrimSpace(line[len(prefix):])
+	if !filepath.IsAbs(gitPath) {
+		gitPath = filepath.Join(dir, gitPath)
+	}
+	gitPath = filepath.Clean(gitPath)
+	if resolved, err := filepath.EvalSymlinks(gitPath); err == nil {
+		return resolved
+	}
+	return gitPath
 }
 
 // pathDir returns the parent directory of a forward-slash path, or "" if the

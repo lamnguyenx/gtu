@@ -48,12 +48,34 @@ func CountTokens(path string, info os.FileInfo) int64 {
 		return countImageTokensFromFile(path, info)
 	}
 
+	if isBinaryExt(ext) {
+		return 0
+	}
+
 	return countTextTokens(path, info)
 }
 
 func isImageExt(ext string) bool {
 	switch ext {
 	case ".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp":
+		return true
+	}
+	return false
+}
+
+func isBinaryExt(ext string) bool {
+	switch ext {
+	case ".o", ".so", ".a", ".dll", ".dylib", ".exe", ".lib", ".obj",
+		".class", ".jar", ".war",
+		".pyc", ".pyo", ".pyd",
+		".gz", ".zip", ".tar", ".tgz", ".bz2", ".xz", ".7z", ".rar", ".zst",
+		".woff", ".woff2", ".ttf", ".otf", ".eot",
+		".mp3", ".mp4", ".avi", ".mov", ".mkv", ".wav", ".flac", ".ogg", ".aac",
+		".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".odt", ".epub",
+		".sqlite", ".db", ".mdb",
+		".ico", ".tiff", ".tif", ".svgz", ".heic",
+		".bin", ".dat", ".pak", ".bundle", ".wasm", ".npz", ".npy", ".pkl",
+		".lock":
 		return true
 	}
 	return false

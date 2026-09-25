@@ -31,13 +31,7 @@ func (a *SequentialAnalyzer) AnalyzeDir(
 	a.ignoreFileType = fileTypeFilter
 
 	go a.UpdateProgress()
-	var giStack gitignore.Stack
-	if a.autoGitignore {
-		if m, _ := gitignore.MergeFromDir(path); m != nil {
-			giStack = giStack.Push(m)
-		}
-	}
-	dir := a.processDir(path, giStack)
+	dir := a.processDir(path, nil)
 
 	dir.BasePath = filepath.Dir(path)
 	a.setCurrentDir(dir)
@@ -73,7 +67,7 @@ func (a *SequentialAnalyzer) processDir(path string, giStack gitignore.Stack) *D
 
 	// Load local .gitignore and push onto the stack for this subtree
 	if a.autoGitignore {
-		if m, _ := gitignore.MergeFromDir(path); m != nil {
+		if m, _ := gitignore.MergeFromDirWithEntries(path, files); m != nil {
 			giStack = giStack.Push(m)
 		}
 	}
@@ -176,14 +170,16 @@ func (a *SequentialAnalyzer) processDir(path string, giStack gitignore.Stack) *D
 				}
 			}
 
-		if file != nil {
-			// Only set platform-specific attributes for regular files
-			if regularFile, ok := file.(*File); ok {
-				regularFile.Tokens = tokencount.CountTokens(entryPath, info)
-				setPlatformSpecificAttrs(regularFile, info)
-			}
-			totalSize += file.GetUsage()
-			dir.AddFile(file)
+			if file != nil {
+				// Only set platform-specific attributes for regular files
+				if regularFile, ok := file.(*File); ok {
+					if !a.ignoreTokens {
+						regularFile.Tokens = tokencount.CountTokens(entryPath, info)
+					}
+					setPlatformSpecificAttrs(regularFile, info)
+				}
+				totalSize += file.GetUsage()
+				dir.AddFile(file)
 			}
 		}
 	}

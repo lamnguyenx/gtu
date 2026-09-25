@@ -29,6 +29,7 @@ type Analyzer interface {
 	SetTimeFilter(timeFilter TimeFilter)
 	SetArchiveBrowsing(bool)
 	SetAutoGitignore(bool)
+	SetIgnoreTokens(bool)
 	SetFileTypeFilter(filter ShouldFileBeIgnored)
 	Cancel()
 	GetDone() SignalGroup

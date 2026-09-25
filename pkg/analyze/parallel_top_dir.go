@@ -8,6 +8,7 @@ import (
 
 	"github.com/dundee/gdu/v5/internal/common"
 	"github.com/dundee/gdu/v5/pkg/fs"
+	"github.com/dundee/gdu/v5/pkg/gitignore"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -54,6 +55,13 @@ func (a *TopDirAnalyzer) AnalyzeDir(
 		log.Print(err.Error())
 	}
 
+	var giStack gitignore.Stack
+	if a.autoGitignore {
+		if m, _ := gitignore.MergeFromDirWithEntries(path, files); m != nil {
+			giStack = giStack.Push(m)
+		}
+	}
+
 	dir := SimpleDir{
 		SimpleFile: SimpleFile{
 			Name:      filepath.Base(path),
@@ -76,20 +84,27 @@ func (a *TopDirAnalyzer) AnalyzeDir(
 			if a.shouldSkipDir(name, entryPath) {
 				continue
 			}
+			if len(giStack) > 0 && giStack.Match(entryPath, true) {
+				continue
+			}
 			topDir := &TopDir{
 				Name: name,
 				Flag: ' ',
 			}
 			topDirs = append(topDirs, topDir)
-			go func(entryPath string) {
-				a.processSubDir(entryPath, topDir)
+			go func(entryPath string, stack gitignore.Stack) {
+				a.processSubDir(entryPath, topDir, stack)
 				subDirChan <- struct{}{}
-			}(entryPath)
+			}(entryPath, giStack)
 		} else {
 			var info os.FileInfo
 			// Apply file type filter if set
 			if a.ignoreFileType(name) {
 				continue // Skip this file
+			}
+
+			if len(giStack) > 0 && giStack.Match(entryPath, false) {
+				continue
 			}
 
 			info, err = f.Info()
@@ -160,7 +175,7 @@ func (a *TopDirAnalyzer) AnalyzeDir(
 	return &dir
 }
 
-func (a *TopDirAnalyzer) processSubDir(path string, topDir *TopDir) {
+func (a *TopDirAnalyzer) processSubDir(path string, topDir *TopDir, giStack gitignore.Stack) {
 	var (
 		err        error
 		totalSize  int64
@@ -175,6 +190,12 @@ func (a *TopDirAnalyzer) processSubDir(path string, topDir *TopDir) {
 		topDir.SetFlag('.')
 	}
 
+	if a.autoGitignore {
+		if m, _ := gitignore.MergeFromDirWithEntries(path, files); m != nil {
+			giStack = giStack.Push(m)
+		}
+	}
+
 	for _, f := range files {
 		if a.IsCancelled() {
 			break
@@ -185,24 +206,31 @@ func (a *TopDirAnalyzer) processSubDir(path string, topDir *TopDir) {
 			if a.shouldSkipDir(name, entryPath) {
 				continue
 			}
+			if len(giStack) > 0 && giStack.Match(entryPath, true) {
+				continue
+			}
 
 			totalCount++
 
 			select {
 			case concurrencyLimit <- struct{}{}:
 				a.wait.Add(1)
-				go func(entryPath string) {
-					a.processSubDir(entryPath, topDir)
+				go func(entryPath string, stack gitignore.Stack) {
+					a.processSubDir(entryPath, topDir, stack)
 					<-concurrencyLimit
 					a.wait.Done()
-				}(entryPath)
+				}(entryPath, giStack)
 			default:
-				a.processSubDir(entryPath, topDir)
+				a.processSubDir(entryPath, topDir, giStack)
 			}
 		} else {
 			// Apply file type filter if set
 			if a.ignoreFileType(name) {
 				continue // Skip this file
+			}
+
+			if len(giStack) > 0 && giStack.Match(entryPath, false) {
+				continue
 			}
 
 			info, err = f.Info()

@@ -8,10 +8,9 @@ import (
 
 const maxReadSize = 10 * 1024 * 1024 // 10MB cap for token counting
 
-// isBinaryContent checks for null bytes in the first chunk of data.
 func isBinaryContent(data []byte) bool {
-	if len(data) > 8096 {
-		data = data[:8096]
+	if len(data) > 8192 {
+		data = data[:8192]
 	}
 	for _, b := range data {
 		if b == 0 {
@@ -21,9 +20,14 @@ func isBinaryContent(data []byte) bool {
 	return false
 }
 
-func countTextTokens(path string, _ os.FileInfo) int64 {
+func countTextTokens(path string, info os.FileInfo) int64 {
 	if encoder == nil {
 		return 0
+	}
+
+	readSize := maxReadSize
+	if int(info.Size()) < readSize {
+		readSize = int(info.Size())
 	}
 
 	file, err := os.Open(path)
@@ -32,12 +36,6 @@ func countTextTokens(path string, _ os.FileInfo) int64 {
 		return 0
 	}
 	defer file.Close()
-
-	readSize := maxReadSize
-	fi, err := file.Stat()
-	if err == nil && int(fi.Size()) < readSize {
-		readSize = int(fi.Size())
-	}
 
 	buf := make([]byte, readSize)
 	n, err := file.Read(buf)
