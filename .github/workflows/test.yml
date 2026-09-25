@@ -55,10 +55,3 @@ jobs:
     - name: Calc coverage
       run: |
         go test -v -race -covermode=atomic -coverprofile=coverage.out ./...
-    - name: Upload coverage report
-      uses: codecov/codecov-action@v7
-      with:
-        files: ./coverage.out
-        fail_ci_if_error: true
-        verbose: true
-        token: ${{ secrets.CODECOV_TOKEN }}
